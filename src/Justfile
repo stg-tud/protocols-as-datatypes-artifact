@@ -4,16 +4,8 @@ HOST_3 := "ash"
 
 ETCD_CLIENT_PORT := "2381"
 
-create-jar:
-	#!/usr/bin/env fish
-	set fish_trace 1
-
-	cd ~/work/REScala
-	sbt proBench/Universal/packageBin
-
-	cp ~/work/REScala/Modules/Examples/Protocol\ Benchmarks/target/universal/probench.zip ~/work/benchmarks/jars/probench.zip
-	rm -rf ~/work/benchmarks/client/*
-	unzip ~/work/benchmarks/jars/probench.zip -d ~/work/benchmarks/client
+create-bin:
+    fish scripts/create-bin.fish
 
 start-etcd-cluster leader="hel":
 	#!/usr/bin/env fish
