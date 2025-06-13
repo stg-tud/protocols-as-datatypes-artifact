@@ -1,10 +1,10 @@
 #!/usr/bin/env fish
 set fish_trace 1
 
-cd Bismuth
+cd bismuth
 sbt proBench/Universal/packageBin
 
-cp .Modules/Examples/Protocol\ Benchmarks/target/universal/probench.zip ../probench.zip
+cp Modules/Examples/Protocol\ Benchmarks/target/universal/probench.zip ../probench.zip
 cd ..
 rm -rf ./bin
 
