@@ -1,9 +1,11 @@
-package rdts.protocols
+package rdts.protocols.paper
 
 import rdts.base.Lattice.syntax
 import rdts.base.{Bottom, Lattice, LocalUid, Uid}
 import rdts.datatypes.Epoch
 import Paxos.given
+import rdts.base.LocalUid.replicaId
+import rdts.protocols.Participants
 import rdts.time.Time
 
 import scala.collection.immutable.NumericRange
@@ -23,16 +25,16 @@ case class MultiPaxos[A](
 
   // public API
   def leader(using Participants): Option[Uid] = currentPaxos.currentRound match
-    case Some((_, PaxosRound(leaderElection, _))) => leaderElection.result
-    case None                                     => None
+    case Some(PaxosRound(leaderElection, _)) => leaderElection.result
+    case None                                => None
 
   def phase(using Participants): MultipaxosPhase =
     currentPaxos.currentRound match
-      case None                                                                      => MultipaxosPhase.LeaderElection
-      case Some((_, PaxosRound(leaderElection, _))) if leaderElection.result.isEmpty => MultipaxosPhase.LeaderElection
-      case Some((_, PaxosRound(leaderElection, proposals)))
+      case None                                                                 => MultipaxosPhase.LeaderElection
+      case Some(PaxosRound(leaderElection, _)) if leaderElection.result.isEmpty => MultipaxosPhase.LeaderElection
+      case Some(PaxosRound(leaderElection, proposals))
           if leaderElection.result.nonEmpty && proposals.votes.nonEmpty => MultipaxosPhase.Voting
-      case Some((_, PaxosRound(leaderElection, proposals)))
+      case Some(PaxosRound(leaderElection, proposals))
           if leaderElection.result.nonEmpty && proposals.votes.isEmpty => MultipaxosPhase.Idle
       case _ => throw new Error("Inconsistent Paxos State")
 
@@ -44,12 +46,7 @@ case class MultiPaxos[A](
     MultiPaxos(rounds.write(currentPaxos.phase1a)) // start new Paxos round with self proposed as leader
 
   def proposeIfLeader(value: A)(using LocalUid, Participants): MultiPaxos[A] =
-    val afterProposal = currentPaxos.phase2a(value)
-    // check if proposing does anything, otherwise return empty delta
-    if currentPaxos.subsumes(afterProposal) then
-      MultiPaxos.empty
-    else
-      MultiPaxos(rounds = rounds.write(afterProposal)) // phase 2a already checks if I am the leader
+    MultiPaxos(rounds = rounds.write(currentPaxos.phase2a(value))) // phase 2a already checks if I am the leader
 
   def upkeep(using LocalUid, Participants): MultiPaxos[A] = {
     // perform upkeep in Paxos

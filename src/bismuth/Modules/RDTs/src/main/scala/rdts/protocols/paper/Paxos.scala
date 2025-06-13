@@ -2,10 +2,10 @@ package rdts.protocols.paper
 
 import rdts.base.LocalUid.replicaId
 import rdts.base.{Bottom, Lattice, LocalUid, Uid}
+import rdts.protocols.{Consensus, Participants}
 import rdts.protocols.paper.Paxos.given
 import rdts.protocols.paper.Util.*
 import rdts.protocols.paper.Util.Agreement.*
-import rdts.protocols.{Consensus, Participants}
 
 // Paxos PRDT
 type LeaderElection = Voting[Uid]
@@ -79,7 +79,7 @@ case class Paxos[A](
           ))
     )
 
-  def phase2a(using LocalUid, Participants): Paxos[A] =
+  def phase2a(myValue: A)(using LocalUid, Participants): Paxos[A] =
     // propose a value if I am the leader
     updateIf(isCurrentLeader)(
       if newestReceivedVal.nonEmpty then
@@ -91,6 +91,15 @@ case class Paxos[A](
         // no values received during leader election, propose my value
         Paxos(Map(currentBallotNum -> voteValue(myValue)))
     )
+
+  // This is a helper function that allows calling phase2a without a parameter.
+  // In this case myValue has to be known from context, otherwise this does nothing.
+  def phase2a(using LocalUid, Participants): Paxos[A] = {
+    // try to determine my process' value
+    updateIf(myValue.nonEmpty) {
+      phase2a(myValue.get)
+    }
+  }
 
   def phase2b(using LocalUid, Participants): Paxos[A] =
     // accept proposed value
@@ -130,10 +139,12 @@ case class Paxos[A](
     rounds.filter(_._2.proposals.votes.nonEmpty).maxOption
   def newestReceivedVal(using LocalUid) =
     lastValueVote.map(_._2.proposals.votes.head.value)
-  def myValue(using LocalUid): A = rounds(BallotNum(
+  def myValue(using LocalUid): Option[A] = rounds.get(BallotNum(
     replicaId,
     -1
-  )).proposals.votes.head.value
+  )).map(_.proposals.votes.head.value)
+  def newestBallotWithLeader(using Participants): Option[(BallotNum, PaxosRound[A])] =
+    rounds.filter(_._2.leaderElection.result.nonEmpty).maxOption
 }
 
 object Paxos {
