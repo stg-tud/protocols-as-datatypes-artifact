@@ -11,7 +11,7 @@ RUN rm etcd-v3.6.0-linux-amd64.tar.gz
 # build scala sources
 COPY src/ /app/
 WORKDIR /app
-RUN just package-bin
+RUN ["just", "package-bin"]
 
 ENTRYPOINT [ "just" ]
 CMD [ "--choose" ]
