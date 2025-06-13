@@ -4,7 +4,7 @@ set fish_trace 1
 cd bismuth
 sbt proBench/Universal/packageBin
 
-cp Modules/Examples/Protocol\ Benchmarks/target/universal/probench.zip ../probench.zip
+cp Modules/Protocol\ Benchmarks/target/universal/probench.zip ../probench.zip
 cd ..
 rm -rf ./bin
 
