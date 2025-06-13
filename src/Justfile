@@ -17,7 +17,7 @@ prdt-benchmark-local iterations warmup measurement op="write" mode="timed" kv_ra
 	set -lx SYSTEM_ID prdt
 
 	for i in (seq {{iterations}});
-		set -lx RUN_ID cluster3-{{mode}}-{{warmup}}_{{measurement}}-id{$ID}_run$i
+		set -lx RUN_ID cluster3-{{op}}-{{mode}}-{{warmup}}_{{measurement}}-id{$ID}_run$i
 
 		echo Iteration $i
 		echo RUN_ID $RUN_ID
@@ -50,7 +50,7 @@ etcd-benchmark-local iterations warmup measurement op="write" mode="timed" kv_ra
 	set -lx SYSTEM_ID etcd
 
 	for i in (seq {{iterations}});
-		set -lx RUN_ID cluster3-{{mode}}-{{warmup}}_{{measurement}}-id{$ID}_run$i
+		set -lx RUN_ID cluster3-{{op}}-{{mode}}-{{warmup}}_{{measurement}}-id{$ID}_run$i
 
 		echo Iteration $i
 		echo RUN_ID $RUN_ID
