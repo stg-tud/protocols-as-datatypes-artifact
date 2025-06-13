@@ -3,5 +3,6 @@ data
 .metals
 .scala-build
 .zed
+.vscode
 target
 Bismuth
