@@ -9,7 +9,7 @@ import rdts.protocols.Participants
 
 case class Vote[A](voter: Uid, value: A)
 
-case class Voting[A](votes: Set[Vote[A]]) {
+case class Voting[A](votes: Set[Vote[A]] = Set.empty[Vote[A]]) {
   // boolean threshold queries
   def hasNotVoted(using LocalUid): Boolean =
     !votes.exists {
@@ -18,32 +18,33 @@ case class Voting[A](votes: Set[Vote[A]]) {
 
   // decision function
   def decision(using Participants): Agreement[A] =
-    if hasDuplicateVotes() then Invalid
+    if hasDuplicateVotes then Invalid
     else
-      getLeadingValue() match
+      getLeadingValue match
         case Some(value, count) if count >= majority => Decided(value)
         case _                                       => Undecided
 
+  // helper functions
   def majority(using Participants) =
     participants.size / 2 + 1
-  def hasDuplicateVotes(): Boolean =
+  def hasDuplicateVotes: Boolean =
     votes.groupBy(_.voter).values.filter(_.size > 1).nonEmpty
-  def getLeadingValue(): Option[(A, Int)] =
+  def getLeadingValue: Option[(A, Int)] =
     votes.groupBy(_.value)
       .map((value, vts) => (value, vts.size)).maxByOption(_._2)
 
   // protocol actions
-  def voteFor(value: A)(using LocalUid): Voting[A] = // §\label{line:voting-votefor}
-    updateIf(hasNotVoted)( // §\label{line:updateif}
-      Voting(Set(Vote(replicaId, value))) // §\label{line:voting-voteforreturn}
+  def voteFor(value: A)(using LocalUid): Voting[A] =
+    updateIf(hasNotVoted)(
+      Voting(Set(Vote(replicaId, value)))
     )
 
   // convenience function to read decision as option
   def result(using Participants): Option[A] =
     decision match {
-      case Invalid => None
+      case Invalid        => None
       case Decided(value) => Some(value)
-      case Undecided => None
+      case Undecided      => None
     }
 }
 
