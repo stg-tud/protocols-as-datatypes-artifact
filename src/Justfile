@@ -106,11 +106,11 @@ all-benchmarks-local iterations="2" warmup="10" measurement="30" mode="timed" kv
 	just prdt-benchmark-local {{iterations}} {{warmup}} {{measurement}} read {{mode}} '{{kv_range}}' {{block_size}}
 	just prdt-benchmark-local {{iterations}} {{warmup}} {{measurement}} write {{mode}} '{{kv_range}}' {{block_size}}
 	just prdt-benchmark-local {{iterations}} {{warmup}} {{measurement}} mixed {{mode}} '{{kv_range}}' {{block_size}}
-	just etcd-benchmark-local {{iterations}} {{warmup}} {{measurement}} read t{{mode}} '{{kv_range}}' {{block_size}}
+	just etcd-benchmark-local {{iterations}} {{warmup}} {{measurement}} read {{mode}} '{{kv_range}}' {{block_size}}
 	just etcd-benchmark-local {{iterations}} {{warmup}} {{measurement}} write {{mode}} '{{kv_range}}' {{block_size}}
 	just etcd-benchmark-local {{iterations}} {{warmup}} {{measurement}} mixed {{mode}} '{{kv_range}}' {{block_size}}
 
-start-etc-node number="1" host1="localhost" host2=":
+start-etc-node number="1" host1="localhost" host2="localhost" host3="localhost":
 	etcd --data-dir=/tmp/data1.etcd --name machine-{{number}} --initial-advertise-peer-urls http://localhost:238{{number}} --listen-peer-urls http://localhost:238{{number}} --advertise-client-urls http://localhost:80{{number}}0 --listen-client-urls http://localhost:80{{number}}0 --initial-cluster machine-1=http://localhost:2381,machine-2=http://localhost:2382,machine-3=http://localhost:2383 --initial-cluster-state new --initial-cluster-token token-01
 
 etc-client:
