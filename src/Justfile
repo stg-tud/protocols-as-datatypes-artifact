@@ -2,94 +2,19 @@ HOST_1 := "sin"
 HOST_2 := "hel"
 HOST_3 := "ash"
 
-ETCD_CLIENT_PORT := "2381"
+BIN_PATH := "bin/probench/bin/probench"
+export BENCH_RESULTS_DIR := "benchmark-results"
 
-create-bin:
+package-bin:
     fish scripts/create-bin.fish
 
-start-etcd-cluster leader="hel":
+prdt-benchmark-local iterations warmup measurement op="write" mode="timed" kv_range="10000 20000" block_size="2000":
 	#!/usr/bin/env fish
 	set fish_trace 1
 
-	ssh ash "sudo systemctl start etcd-node.service"
-	ssh sin "sudo systemctl start etcd-node.service"
-	ssh hel "sudo systemctl start etcd-node.service"
-
-	sleep 10
-
-	set -lx ETCD_CLUSTER "{{HOST_1}}:2381,{{HOST_2}}:2381,{{HOST_3}}:2381"
-
-	set -l ep_status (string split "," (etcdctl --endpoints $ETCD_CLUSTER endpoint status | grep {{leader}}))
-	etcdctl --endpoints $ETCD_CLUSTER move-leader (string trim $ep_status[2])
-
-start-pb-cluster:
-	ssh sin "sudo systemctl start pb-node.service"
-	sleep 1
-	ssh hel "sudo systemctl start pb-node.service"
-	sleep 1
-	ssh ash "sudo systemctl start pb-node.service"
-	sleep 1
-	sleep 10
-
-stop-etcd-cluster:
-	ssh sin "sudo systemctl stop etcd-node.service"
-	ssh hel "sudo systemctl stop etcd-node.service"
-	ssh ash "sudo systemctl stop etcd-node.service"
-
-stop-pb-cluster:
-	ssh ash "sudo systemctl stop pb-node.service"
-	ssh sin "sudo systemctl stop pb-node.service"
-	ssh hel "sudo systemctl stop pb-node.service"
-
-start-etcd-client-all:
-	#!/usr/bin/env fish
-	set -lx CLUSTER http://{{HOST_1}}:2381 http://{{HOST_2}}:2381 http://{{HOST_3}}:2381
-
-	./client/probench/bin/probench etcd-client --name client_1 --endpoints $CLUSTER
-
-start-etcd-client leader:
-	#!/usr/bin/env fish
-	set -lx CLUSTER http://{{leader}}:2381
-
-	./client/probench/bin/probench etcd-client --name client_1 --endpoints $CLUSTER
-
-start-pb-client node_name="hel":
-	./client/probench/bin/probench client --name client_1 --node {{node_name}}:8010
-
-start-pb-bench-client warmup measurement node_name="hel" mode="write":
-	./client/probench/bin/probench benchmark-client-timed --mode {{mode}} --warmup {{warmup}} --measurement {{measurement}} --name client1 --node {{node_name}}:8010
-
-start-etcd-bench-client warmup measurement node_name="hel" mode="write":
-	./client/probench/bin/probench etcd-client-timed --mode {{mode}} --warmup {{warmup}} --measurement {{measurement}} --name client1 --endpoints http://{{node_name}}:2381
-
-proto-bench iterations warmup measurement mode="write" node_name="hel" leader="hel":
-	#!/usr/bin/env fish
-	set fish_trace 1
-
-	set -lx BENCH_RESULTS_DIR results
 	set -lx ID (random)
 
-	set -lx SYSTEM_ID pb
-
-	for i in (seq {{iterations}});
-		set -lx RUN_ID cluster3-{{mode}}-{{warmup}}_{{measurement}}-id{$ID}_run$i
-
-		echo Iteration $i
-
-		just stop-pb-cluster
-		just start-pb-cluster
-		just start-pb-bench-client {{warmup}} {{measurement}} {{node_name}} {{mode}}
-		just stop-pb-cluster
-	end
-
-etcd-bench iterations warmup measurement mode="write" node_name="hel" leader="hel":
-	#!/usr/bin/env fish
-	set fish_trace 1
-
-	set -lx BENCH_RESULTS_DIR results
-	set -lx ID (random)
-
-	set -lx SYSTEM_ID etcd
+	set -lx SYSTEM_ID prdt
 
 	for i in (seq {{iterations}});
 		set -lx RUN_ID cluster3-{{mode}}-{{warmup}}_{{measurement}}-id{$ID}_run$i
@@ -97,51 +22,29 @@ etcd-bench iterations warmup measurement mode="write" node_name="hel" leader="he
 		echo Iteration $i
 		echo RUN_ID $RUN_ID
 
-		just stop-etcd-cluster
-		just start-etcd-cluster {{leader}}
-		just start-etcd-bench-client {{warmup}} {{measurement}} {{node_name}} {{mode}}
-		just stop-etcd-cluster
-	end
-
-
-proto-bench-local iterations warmup measurement mode="write":
-	#!/usr/bin/env fish
-	set fish_trace 1
-
-	set -lx BENCH_RESULTS_DIR results
-	set -lx ID (random)
-
-	set -lx SYSTEM_ID pb
-
-	for i in (seq {{iterations}});
-		set -lx RUN_ID cluster3-{{mode}}-{{warmup}}_{{measurement}}-id{$ID}_run$i
-
-		echo Iteration $i
-
 		# start cluster
-		./client/probench/bin/probench node --name NODE1 --listen-client-port 8010 --listen-peer-port 8011 --cluster --initial-cluster-ids NODE1 NODE2 NODE3 &> /dev/null &
+		{{BIN_PATH}} node --name NODE1 --listen-client-port 8010 --listen-peer-port 8011 --cluster --initial-cluster-ids NODE1 NODE2 NODE3 &> /dev/null &
 		set -l NODE1 (jobs -pl)
 		sleep 1
 
-		./client/probench/bin/probench node --name NODE2 --listen-client-port 8020 --listen-peer-port 8021 --cluster localhost:8011 --initial-cluster-ids NODE1 NODE2 NODE3 &> /dev/null &
+		{{BIN_PATH}} node --name NODE2 --listen-client-port 8020 --listen-peer-port 8021 --cluster localhost:8011 --initial-cluster-ids NODE1 NODE2 NODE3 &> /dev/null &
 		set -l NODE2 (jobs -pl)
 		sleep 1
 
-		./client/probench/bin/probench  node --name NODE3 --listen-client-port 8030 --listen-peer-port 8031 --cluster localhost:8011 localhost:8021 --initial-cluster-ids NODE1 NODE2 NODE3 &> /dev/null &
+		{{BIN_PATH}} node --name NODE3 --listen-client-port 8030 --listen-peer-port 8031 --cluster localhost:8011 localhost:8021 --initial-cluster-ids NODE1 NODE2 NODE3 &> /dev/null &
 		set -l NODE3 (jobs -pl)
 		sleep 1
 
 		# start client
-		just start-pb-bench-client {{warmup}} {{measurement}} localhost {{mode}}
+		just start-pb-bench-client {{warmup}} {{measurement}} localhost {{op}} {{mode}} "{{kv_range}}" {{block_size}}
 		kill $NODE1 $NODE2 $NODE3
 		sleep 5
 	end
 
-etcd-bench-local iterations warmup measurement mode="write" leader="machine-1":
+etcd-benchmark-local iterations warmup measurement op="write" mode="timed" kv_range="10000 20000" block_size="2000" leader="8010":
 	#!/usr/bin/env fish
 	set fish_trace 1
 
-	set -lx BENCH_RESULTS_DIR results
 	set -lx ID (random)
 
 	set -lx SYSTEM_ID etcd
@@ -165,49 +68,44 @@ etcd-bench-local iterations warmup measurement mode="write" leader="machine-1":
 
 		rm -rf /tmp/data*.etcd
 
-		etcd --data-dir=/tmp/data1.etcd --name {$NAME_1} --initial-advertise-peer-urls http://localhost:2381 --listen-peer-urls http://localhost:2381 --advertise-client-urls http://localhost:8010 --listen-client-urls http://localhost:8010 --initial-cluster {$CLUSTER} --initial-cluster-token token-01 &> /dev/null &
-		sleep 1;
-		etcd --data-dir=/tmp/data2.etcd --name {$NAME_2} --initial-advertise-peer-urls http://localhost:2382 --listen-peer-urls http://localhost:2382 --advertise-client-urls http://localhost:8020 --listen-client-urls http://localhost:8020 --initial-cluster {$CLUSTER} --initial-cluster-token token-01 &> /dev/null &
-		sleep 1;
-		etcd --data-dir=/tmp/data3.etcd --name {$NAME_3} --initial-advertise-peer-urls http://localhost:2383 --listen-peer-urls http://localhost:2383 --advertise-client-urls http://localhost:8030 --listen-client-urls http://localhost:8030 --initial-cluster {$CLUSTER} --initial-cluster-token token-01 &> /dev/null &
+		etcd --data-dir=/tmp/data1.etcd --name {$NAME_1} --initial-advertise-peer-urls http://localhost:2381 --listen-peer-urls http://localhost:2381 --advertise-client-urls http://localhost:8010 --listen-client-urls http://localhost:8010 --initial-cluster {$CLUSTER} --initial-cluster-state {$CLUSTER_STATE} --initial-cluster-token token-01 &> /dev/null &
+		set -l NODE1 (jobs -pl)
+
+		etcd --data-dir=/tmp/data2.etcd --name {$NAME_2} --initial-advertise-peer-urls http://localhost:2382 --listen-peer-urls http://localhost:2382 --advertise-client-urls http://localhost:8020 --listen-client-urls http://localhost:8020 --initial-cluster {$CLUSTER} --initial-cluster-state {$CLUSTER_STATE} --initial-cluster-token token-01 &> /dev/null &
+		set -l NODE2 (jobs -pl)
+
+		etcd --data-dir=/tmp/data3.etcd --name {$NAME_3} --initial-advertise-peer-urls http://localhost:2383 --listen-peer-urls http://localhost:2383 --advertise-client-urls http://localhost:8030 --listen-client-urls http://localhost:8030 --initial-cluster {$CLUSTER} --initial-cluster-state {$CLUSTER_STATE} --initial-cluster-token token-01 &> /dev/null &
+		set -l NODE3 (jobs -pl)
+
 		sleep 5
 
-		set -lx ETCD_CLUSTER "$HOST_1:2381,$HOST_2:2382,$HOST_3:2383"
+		set -lx ETCD_CLUSTER "$HOST_1:8010,$HOST_2:8020,$HOST_3:8030"
 
-		set -l ep_status (string split "," (etcdctl --endpoints $ETCD_CLUSTER endpoint status | grep 2381))
+		# move leader to specified node
+		set -lx leader {{leader}}	
+		set -lx ep_status (string split "," (etcdctl --endpoints $ETCD_CLUSTER endpoint status | grep {$leader}))
 		etcdctl --endpoints $ETCD_CLUSTER move-leader (string trim $ep_status[2])
 
 		sleep 5
 
-		./client/probench/bin/probench etcd-client-timed --mode {{mode}} --warmup {{warmup}} --measurement {{measurement}} --name client1 --endpoints http://localhost:2381
+		# start client
+		just start-etcd-bench-client {{warmup}} {{measurement}} localhost {{op}} {{mode}} "{{kv_range}}" {{block_size}}
 
 		kill -KILL (jobs -p)
 		sleep 5
 	end
 
-all-benchmarks iterations="5" warmup="0" measurement="300" node_name="hel":
-	#!/usr/bin/env fish
-	just proto-bench {{iterations}} {{warmup}} {{measurement}} read {{node_name}}
-	just proto-bench {{iterations}} {{warmup}} {{measurement}} write {{node_name}}
-	just proto-bench {{iterations}} {{warmup}} {{measurement}} mixed {{node_name}}
-	just etcd-bench {{iterations}} {{warmup}} {{measurement}} read {{node_name}}
-	just etcd-bench {{iterations}} {{warmup}} {{measurement}} write {{node_name}}
-	just etcd-bench {{iterations}} {{warmup}} {{measurement}} mixed {{node_name}}
+start-pb-bench-client warmup measurement node_name="localhost" op="write" mode="timed" kv_range="10000 20000" block_size="2000" :
+	{{BIN_PATH}} benchmark-client --mode {{mode}} --op-type {{op}} --block-size {{block_size}} --kv-range {{kv_range}} --warmup {{warmup}} --measurement {{measurement}} --name client1 --node {{node_name}}:8010
 
-all-benchmarks-everywhere iterations="5" warmup="0" measurement="300":
-	#!/usr/bin/env fish
-	just all-benchmarks {{iterations}} {{warmup}} {{measurement}} hel
-	mv results results-hel
-	just all-benchmarks {{iterations}} {{warmup}} {{measurement}} sin
-	mv results results-sin
-	#just all-benchmarks {{iterations}} {{warmup}} {{measurement}} ash
-	#mv results results-ash
+start-etcd-bench-client warmup measurement node_name="localhost" op="write" mode="timed" kv_range="10000 20000" block_size="2000":
+	{{BIN_PATH}} etcd-benchmark --mode {{mode}} --warmup {{warmup}} --measurement {{measurement}} --op-type {{op}} --block-size {{block_size}} --kv-range {{kv_range}} --name client1 --endpoints http://{{node_name}}:8010
 
-all-benchmarks-local iterations="5" warmup="0" measurement="200":
+all-benchmarks-local iterations="2" warmup="10" measurement="30" mode="timed" kv_range="10000 20000" block_size="2000":
 	#!/usr/bin/env fish
-	just proto-bench-local {{iterations}} {{warmup}} {{measurement}} read
-	just proto-bench-local {{iterations}} {{warmup}} {{measurement}} write
-	just proto-bench-local {{iterations}} {{warmup}} {{measurement}} mixed
-	just etcd-bench-local {{iterations}} {{warmup}} {{measurement}} read
-	just etcd-bench-local {{iterations}} {{warmup}} {{measurement}} write
-	just etcd-bench-local {{iterations}} {{warmup}} {{measurement}} mixed
+	just prdt-benchmark-local {{iterations}} {{warmup}} {{measurement}} read {{mode}} '{{kv_range}}' {{block_size}}
+	just prdt-benchmark-local {{iterations}} {{warmup}} {{measurement}} write {{mode}} '{{kv_range}}' {{block_size}}
+	just prdt-benchmark-local {{iterations}} {{warmup}} {{measurement}} mixed {{mode}} '{{kv_range}}' {{block_size}}
+	just etcd-benchmark-local {{iterations}} {{warmup}} {{measurement}} read t{{mode}} '{{kv_range}}' {{block_size}}
+	just etcd-benchmark-local {{iterations}} {{warmup}} {{measurement}} write {{mode}} '{{kv_range}}' {{block_size}}
+	just etcd-benchmark-local {{iterations}} {{warmup}} {{measurement}} mixed {{mode}} '{{kv_range}}' {{block_size}}
