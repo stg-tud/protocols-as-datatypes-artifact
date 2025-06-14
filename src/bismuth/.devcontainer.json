@@ -1,0 +1,13 @@
+{
+	"name": "Bismuth Development Environment",
+	"build": {
+		"dockerfile": "./Containerfile"
+	},
+	"customizations": {
+		"jetbrains": {
+			"plugins": [
+				"org.intellij.scala"
+			]
+		}
+	}
+}

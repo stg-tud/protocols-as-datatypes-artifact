@@ -19,8 +19,9 @@ object Settings {
   // and https://www.scala-lang.org/api/current/scala/language$.html
   // and run: cs launch scala3-compiler -- -help
 
-  val scala3defaultsUnstable = Def.settings(
+  val scala3NonStrictDefaults = Def.settings(
     scalaVersion := scala3VersionString,
+    javaOutputVersion(17),
     fullFeatureDeprecationWarnings,
     scalaSourceLevel(scala3VersionMinor),
     warningsAreErrors(Compile / compile, Test / compile),
@@ -30,14 +31,11 @@ object Settings {
   )
 
   val scala3defaults = Def.settings(
-    scala3defaultsUnstable,
-    unstableInlineAccessors(Compile / compile)
+    scala3NonStrictDefaults,
+    explicitNulls(Compile / compile),
+    safeInit(Compile / compile),
+    unstableInlineAccessors(Compile / compile),
   )
-
-  // enabled to see what breaks and maybe play around with
-  // named tuples seems likely for 3.7, modularity is not SIP approved (though I also have not seen someone arguing against)
-  def experimentalOptions =
-    scalacOptions ++= List("-language:experimental.modularity")
 
   // Spell out feature and deprecation warnings instead of summarizing them into a single warning
   // always turn this on to make the compiler less ominous
@@ -53,7 +51,9 @@ object Settings {
     taskSpecificScalacOption(n.toString, conf*)
   )
 
-  // these are scoped to compile&test only to ensure that doc tasks and such do not randomly fail for no reason
+  // treat warnings as errors
+  // generally, adressing warnings as they come up is much less work than fixing problems later
+  // do consider disabling for migrations and large refactorings to allow those changes to happen in smaller steps
   def warningsAreErrors(conf: TaskKey[?]*) = taskSpecificScalacOption("-Werror", conf*)
 
   // seems generally unobtrusive (just add some explicit ()) and otherwise helpful
@@ -72,23 +72,15 @@ object Settings {
   // however, this has some kinda false positives when subclasses pass parameters to superclasses.
   def privateShadow(conf: TaskKey[?]*) = taskSpecificScalacOption("-Wshadow:private-shadow", conf*)
 
-  // this is -Ysafe-init for scala 3.4 and below, but we don’t use that because seems to produce compiler crashes in those versions
-  def safeInit(conf: TaskKey[?]*) =
-    if (scala3VersionString.startsWith("3.5"))
-      taskSpecificScalacOption("-Wsafe-init", conf*)
-    else Seq()
+  // checks that objects are fully initialized before they are accessed
+  // is kinda likely to cause strange compiler crashes, disable if something is strange
+  // (was -Ysafe-init for scala 3.4 and below)
+  def safeInit(conf: TaskKey[?]*) = taskSpecificScalacOption("-Wsafe-init", conf*)
 
   // makes Null no longer be a sub type of all subtypes of AnyRef
-  // but is super annoying with java interop.
-  // Scala 3.5 tries to improve that interop by making java return types special, see https://github.com/scala/scala3/pull/17369
-  // If i understand correctly, that is enabled by default, and the second flag could be used to restore old behaviour
-  def explicitNulls(conf: TaskKey[?]*) =
-    if (scala3VersionString.startsWith("3.5"))
-      Def.settings(
-        taskSpecificScalacOption("-Yexplicit-nulls", conf*),
-        // taskSpecificScalacOption("-Yno-flexible-types", conf: _*),
-      )
-    else Seq()
+  // since Scala 3.5 uses special return types for Java methods, see https://github.com/scala/scala3/pull/17369
+  // disable special handling with -Yno-flexible-types
+  def explicitNulls(conf: TaskKey[?]*) = taskSpecificScalacOption("-Yexplicit-nulls", conf*)
 
   // Enforce then and do syntax, combine with rewrite to automatically rewrite
   def newSyntax = scalacOptions += "-new-syntax"
@@ -133,10 +125,6 @@ object Settings {
     c2.map { c => c / scalacOptions += setting }
   }
 
-  val resolverJitpack = resolvers += "jitpack" at "https://jitpack.io"
-  val resolverS01     = resolvers += "sonatype staging S01" at "https://s01.oss.sonatype.org/content/groups/staging/"
-  val resolverOss     = resolvers += "sonatype staging OSS" at "https://oss.sonatype.org/content/groups/staging/"
-
   // this is a tool to analyse memory consumption/layout
   val jolSettings = Seq(
     libraryDependencies += "org.openjdk.jol" % "jol-core" % "0.17",
@@ -148,23 +136,4 @@ object Settings {
   // TLDR: enables the dom API when running on nodejs for the tests
   val jsEnvDom = jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
 
-  // allows to specify a source map prefix, in case you want to have source maps refer to some online source
-  // 2024-05-30: Seems to be meant for jitpack publishing
-  // Example:
-  // CUSTOM_SCALAJS_SOURCE_MAP_PREFIX="https://raw.githubusercontent.com/rescala-lang/REScala/" sbt -Dsbt.log.noformat=true 'publishM2'
-  def sourcemapFromEnv() = {
-    scala.sys.env.get("CUSTOM_SCALAJS_SOURCE_MAP_PREFIX") match {
-      case Some(customSourcePrefix) if !customSourcePrefix.isEmpty =>
-        Def.settings(
-          scalacOptions += {
-
-            def gitHash: String = sys.process.Process("git rev-parse HEAD").lineStream_!.head
-            def baseUrl: String = (LocalRootProject / baseDirectory).value.toURI.toString
-
-            s"-scalajs-mapSourceURI:$baseUrl->$customSourcePrefix$gitHash/"
-          }
-        )
-      case _ => Def.settings()
-    }
-  }
 }
