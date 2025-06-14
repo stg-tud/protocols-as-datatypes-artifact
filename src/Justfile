@@ -23,22 +23,20 @@ prdt-benchmark-local iterations warmup measurement op="write" mode="timed" kv_ra
 		echo RUN_ID $RUN_ID
 
 		# start cluster
-		{{BIN_PATH}} node --name NODE1 --listen-client-port 8010 --listen-peer-port 8011 --cluster --initial-cluster-ids NODE1 NODE2 NODE3 &> /dev/null &
+		{{BIN_PATH}} node --name NODE1 --listen-client-port 8010 --listen-peer-port 8011 --cluster --initial-cluster-ids NODE1 NODE2 NODE3 &
 		set -l NODE1 (jobs -pl)
-		sleep 1
 
-		{{BIN_PATH}} node --name NODE2 --listen-client-port 8020 --listen-peer-port 8021 --cluster localhost:8011 --initial-cluster-ids NODE1 NODE2 NODE3 &> /dev/null &
+		{{BIN_PATH}} node --name NODE2 --listen-client-port 8020 --listen-peer-port 8021 --cluster localhost:8011 --initial-cluster-ids NODE1 NODE2 NODE3 &
 		set -l NODE2 (jobs -pl)
-		sleep 1
 
-		{{BIN_PATH}} node --name NODE3 --listen-client-port 8030 --listen-peer-port 8031 --cluster localhost:8011 localhost:8021 --initial-cluster-ids NODE1 NODE2 NODE3 &> /dev/null &
+		{{BIN_PATH}} node --name NODE3 --listen-client-port 8030 --listen-peer-port 8031 --cluster localhost:8011 localhost:8021 --initial-cluster-ids NODE1 NODE2 NODE3 &
 		set -l NODE3 (jobs -pl)
-		sleep 1
+		sleep 5
 
 		# start client
 		just start-pb-bench-client {{warmup}} {{measurement}} localhost {{op}} {{mode}} "{{kv_range}}" {{block_size}}
 		kill $NODE1 $NODE2 $NODE3
-		sleep 5
+		sleep 10
 	end
 
 etcd-benchmark-local iterations warmup measurement op="write" mode="timed" kv_range="10000 20000" block_size="2000" leader="8010":
@@ -68,13 +66,13 @@ etcd-benchmark-local iterations warmup measurement op="write" mode="timed" kv_ra
 
 		rm -rf /tmp/data*.etcd
 
-		etcd --data-dir=/tmp/data1.etcd --name {$NAME_1} --initial-advertise-peer-urls http://localhost:2381 --listen-peer-urls http://localhost:2381 --advertise-client-urls http://localhost:8010 --listen-client-urls http://localhost:8010 --initial-cluster {$CLUSTER} --initial-cluster-state {$CLUSTER_STATE} --initial-cluster-token token-01 &> /dev/null &
+		etcd --data-dir=/tmp/data1.etcd --name {$NAME_1} --initial-advertise-peer-urls http://localhost:2381 --listen-peer-urls http://localhost:2381 --advertise-client-urls http://localhost:8010 --listen-client-urls http://localhost:8010 --initial-cluster {$CLUSTER} --initial-cluster-state {$CLUSTER_STATE} --initial-cluster-token token-01 &
 		set -l NODE1 (jobs -pl)
 
-		etcd --data-dir=/tmp/data2.etcd --name {$NAME_2} --initial-advertise-peer-urls http://localhost:2382 --listen-peer-urls http://localhost:2382 --advertise-client-urls http://localhost:8020 --listen-client-urls http://localhost:8020 --initial-cluster {$CLUSTER} --initial-cluster-state {$CLUSTER_STATE} --initial-cluster-token token-01 &> /dev/null &
+		etcd --data-dir=/tmp/data2.etcd --name {$NAME_2} --initial-advertise-peer-urls http://localhost:2382 --listen-peer-urls http://localhost:2382 --advertise-client-urls http://localhost:8020 --listen-client-urls http://localhost:8020 --initial-cluster {$CLUSTER} --initial-cluster-state {$CLUSTER_STATE} --initial-cluster-token token-01 &
 		set -l NODE2 (jobs -pl)
 
-		etcd --data-dir=/tmp/data3.etcd --name {$NAME_3} --initial-advertise-peer-urls http://localhost:2383 --listen-peer-urls http://localhost:2383 --advertise-client-urls http://localhost:8030 --listen-client-urls http://localhost:8030 --initial-cluster {$CLUSTER} --initial-cluster-state {$CLUSTER_STATE} --initial-cluster-token token-01 &> /dev/null &
+		etcd --data-dir=/tmp/data3.etcd --name {$NAME_3} --initial-advertise-peer-urls http://localhost:2383 --listen-peer-urls http://localhost:2383 --advertise-client-urls http://localhost:8030 --listen-client-urls http://localhost:8030 --initial-cluster {$CLUSTER} --initial-cluster-state {$CLUSTER_STATE} --initial-cluster-token token-01 &
 		set -l NODE3 (jobs -pl)
 
 		sleep 5
@@ -92,7 +90,7 @@ etcd-benchmark-local iterations warmup measurement op="write" mode="timed" kv_ra
 		just start-etcd-bench-client {{warmup}} {{measurement}} localhost {{op}} {{mode}} "{{kv_range}}" {{block_size}}
 
 		kill -KILL (jobs -p)
-		sleep 5
+		sleep 10
 	end
 
 start-pb-bench-client warmup measurement node_name="localhost" op="write" mode="timed" kv_range="10000 20000" block_size="2000" :
