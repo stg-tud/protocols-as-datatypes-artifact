@@ -1,0 +1,62 @@
+# - name: ensure that nodes are set up properly
+#   ansible.builtin.import_playbook: setup-nodes.yaml
+
+- name: setup etcd
+  hosts: nodes
+  tasks:
+    - name: add etcd start script
+      ansible.builtin.template:
+        src: scripts/start-etcd.sh.template
+        dest: /root/start-etcd.sh
+        mode: u+x
+    - name: add etcd systemd service
+      ansible.builtin.copy:
+        src: scripts/etcd-node.service
+        dest: /etc/systemd/system/etcd-node.service
+
+- name: start etcd nodes
+  hosts: nodes
+  vars:
+    etcd_endpoints: "{% for node in groups['nodes'] %}{{ hostvars[node]['ansible_facts']['default_ipv4']['address'] }}:8010{{ ',' if not loop.last else ''}}{% endfor %}"
+    leader: "{{ groups['nodes'][0] }}"
+    leader_ip: "{{hostvars[leader]['ansible_facts']['default_ipv4']['address']}}"
+  tasks:
+    - name: stop etcd systemd service
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+        name: etcd-node.service
+        state: stopped
+    - name: stop protobench systemd service
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+        name: pb-node.service
+        state: stopped
+    - name: Pause for 5 seconds to wait for cluster to shut down
+      ansible.builtin.pause:
+        seconds: 5
+    - name: start etcd systemd service
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+        name: etcd-node.service
+        state: started
+    - name: wait 5 seconds for cluster to be ready
+      ansible.builtin.pause:
+        seconds: 5
+
+- name: move leader
+  hosts: "{{ leader }}"
+  vars:
+    etcd_endpoints: "{% for node in groups['nodes'] %}{{ hostvars[node]['ansible_facts']['default_ipv4']['address'] }}:8010{{ ',' if not loop.last else ''}}{% endfor %}"
+    leader: "{{ groups['nodes'][0] }}"
+    leader_ip: "{{hostvars[leader]['ansible_facts']['default_ipv4']['address']}}"
+  tasks:
+    - name: Move leader
+      retries: 3
+      ansible.builtin.shell:
+        executable: /usr/bin/fish
+        cmd: etcdctl --endpoints {{ etcd_endpoints }} move-leader (string trim (string split "," (etcdctl --endpoints {{ etcd_endpoints }} endpoint status | grep {{ leader_ip }}))[2])
+      register: leader_transfer
+    - debug:
+        var: leader_transfer.stdout
+      delegate_to: fsn-node1
+      run_once: true

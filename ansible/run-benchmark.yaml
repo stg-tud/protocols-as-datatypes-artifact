@@ -1,0 +1,87 @@
+- name: reset cluster
+  vars:
+    leader_timeout: 2000
+    commit_reads: "false"
+    delta_storage_type: "keep-all"
+    type: pb
+  ansible.builtin.import_playbook: run-{{ type }}-cluster.yaml
+
+- name: run ycsb benchmark
+  hosts: clients
+  vars: # default vars
+    operations: 1000
+    recordcount: "{{ operations }}"
+    threads: 1
+    measurementtype: raw
+    leader_timeout: 2000
+    type: pb
+    adapter: '{% if type == "etcd" %}EtcdAdapter{% else %}ProBenchAdapter{% endif %}'
+    benchmark_timeout: 300 #seconds
+    location: "{% if 'ash-node1' in groups['nodes'] %}geo-repl{% else %}local{% endif %}"
+    leader: "groups['nodes'][0]"
+    commit_reads: "false"
+    delta_storage_type: "keep-all"
+    machine_type: "{% if hostvars[groups['nodes'][0]]['hcloud_type'] is defined %}{{hostvars[groups['nodes'][0]]['hcloud_type']}}{% else %}undefined{% endif %}"
+  tasks:
+    - name: Ensure workload directory exists
+      ansible.builtin.file:
+        path: /root/workloads
+        state: directory
+    - name: copy ycsb workload
+      ansible.builtin.template:
+        src: workloads/{{ workload }}
+        dest: /root/workloads/{{ workload }}
+    - name: copy ycsb benchmark config
+      ansible.builtin.template:
+        src: benchConfig.template
+        dest: /root/benchConfig
+    - name: Pause for 20 seconds to wait for cluster
+      ansible.builtin.pause:
+        seconds: 20
+    - name: load workload
+      when: workload != 'writeonly'
+      timeout: "{{ benchmark_timeout }}"
+      ignore_errors: true
+      ansible.builtin.shell:
+        cmd: java -cp "ycsb-core.jar:probench/lib/*" site.ycsb.Client -db probench.ycsbadapters.{{ adapter }} -P benchConfig -P workloads/{{ workload }} -load
+    - name: Pause for 10 seconds after load
+      when: workload != 'writeonly'
+      ansible.builtin.pause:
+        seconds: 10
+    - name: kill leader after {{ kill_leader | default(none)}} seconds
+      when: kill_leader is defined
+      ansible.builtin.shell:
+        cmd: "sleep {{ kill_leader }}s && systemctl kill -s SIGKILL {{ type }}-node"
+      run_once: true
+      delegate_to: "{{ leader }}"
+      poll: 0
+      async: 60
+    - name: run workload
+      ansible.builtin.shell:
+        cmd: java -cp "ycsb-core.jar:probench/lib/*" site.ycsb.Client -db probench.ycsbadapters.{{ adapter }} -P benchConfig -P workloads/{{ workload }}{% if threads is defined %} -threads {{ threads }}{% endif %}{% if target_throughput is defined %} -target {{ target_throughput }}{% endif %} > out.txt
+      async: "{{ benchmark_timeout }}"
+      poll: 60
+      ignore_errors: true
+    - name: fetch results
+      ansible.builtin.fetch:
+        src: /root/out.txt
+        dest: /app/results/{{ measurementtype }}/{{ type }}/{{now(fmt='%Y-%m-%d-%H:%M:%S')}}-{{ workload }}-{{ groups['nodes'] | length }}nodes-{{ threads }}threads-{% if target_throughput is defined %}{{ target_throughput }}{% else %}default{% endif %}target-{{ operations }}operations-{{ recordcount }}records-{{ leader_timeout }}timeout-{{ max_batch_size | default("default")}}batchsize{% if kill_leader is defined %}-{{ kill_leader }}kill_leader{% endif %}{% if location is defined %}-{{ location }}{% endif %}-commitreads{{ commit_reads }}-history{{ delta_storage_type | replace("-","") | capitalize }}-{{ machine_type}}machine{% if comment is defined %}-{{ comment }}{% endif %}.txt
+        flat: true
+
+# - name: only fetch results
+#   hosts: clients
+#   tasks:
+#    - name: only fetch results
+#      ansible.builtin.fetch:
+#        src: /root/out.txt
+#        dest: results/{{ measurementtype }}/{{ type }}/{{now(fmt='%Y-%m-%d-%H:%M:%S')}}-{{ workload }}-{{ groups['nodes'] | length }}nodes-{{ threads }}threads-{% if target_throughput is defined %}{{ target_throughput }}{% else %}default{% endif %}target-{{ operations }}operations-{{ recordcount }}records-{{ leader_timeout }}timeout-{{ max_batch_size | default("default")}}batchsize.txt
+#        flat: true
+
+- name: fetch logs from nodes
+  hosts: nodes
+  tasks:
+    - name: fetch logs
+      when: type == "pb"
+      ansible.builtin.fetch:
+        src: /root/pb-logs.txt
+        dest: logs/{{now(fmt='%Y-%m-%d-%H:%M:%S')}}

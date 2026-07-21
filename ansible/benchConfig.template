@@ -1,0 +1,31 @@
+# if node != leader
+
+pb.op-timeout = {{ op_timeout | default(1) }}
+
+{% if kill_leader is defined %}
+pb.endpoints = {% for node in groups['nodes'] %}{{ hostvars[node]['ansible_facts']['default_ipv4']['address'] }}:8010{{ " " if not loop.last else ""}}{% endfor %}
+{% else %}
+pb.endpoints = {{ hostvars[leader]['ansible_facts']['default_ipv4']['address'] }}:8010
+{% endif %}
+
+{% if kill_leader is defined %}
+etcd.endpoints = {% for node in groups['nodes'] %}http://{{ hostvars[node]['ansible_facts']['default_ipv4']['address'] }}:8010{{ " " if not loop.last else ""}}{% endfor %}
+{% else %}
+etcd.endpoints = http://{{ hostvars[leader]['ansible_facts']['default_ipv4']['address'] }}:8010
+{% endif %}
+
+recordcount={{ recordcount | default(1000) }}
+operationcount={{ operations | default(1000) }}
+
+#measurementtype = timeseries
+#measurementtype = hdrhistogram+histogram
+measurementtype = {{ measurementtype }}
+#hdrhistogram.fileoutput = true
+#hdrhistogram.output.path = hdrhistogram.out
+# measurement.raw.output_file = out.raw
+
+# in ms:
+# timeseries.granularity = 500
+
+# measurementtype = histogram
+# measurement.histogram.verbose = false

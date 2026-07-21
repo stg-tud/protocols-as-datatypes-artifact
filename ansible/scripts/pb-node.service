@@ -1,0 +1,13 @@
+[Unit]
+Description=protobench node
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=no
+User=root
+ExecStart=/usr/bin/bash /root/start-pb.sh
+
+[Install]
+WantedBy=multi-user.target

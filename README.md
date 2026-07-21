@@ -1,47 +1,98 @@
-This is the artifact for the paper "PRDTs: Composable Knowledge-Based Consensus Protocols with Replicated Data Types".
+This is the artifact for the paper "PRDTs: Composable Design and Verification of Consensus Protocols using Replicated Data Types".
 
-The official submission instructions can be found here: https://2025.splashcon.org/track/splash-2025-oopsla-artifacts#Call-for-Artifacts
+It contains the following components:
 
- knows: Dots(Map())
-  selfcontext: Dots(Map(🪪NODE1 -> [0:29]))}
-        at replication.DeltaDissemination.handleMessage(DeltaDissemination.scala:178)
-        at replication.DeltaDissemination.$anonfun$1$$anonfun$1(DeltaDissemination.scala:114)
-        at channels.LatentConnection$$anon$3.$anonfun$1$$anonfun$1$$anonfun$1$$anonfun$1(Channels.scala:86)
-        at channels.NioTCP.runSelection$$anonfun$1(NioTCP.scala:46)
-        at java.base/java.lang.Iterable.forEach(Iterable.java:75)
-        at channels.NioTCP.runSelection(NioTCP.scala:35)
-        at channels.NioTCP.loopSelection(NioTCP.scala:30)
-        at probench.cli$.$anonfun$6(cli.scala:233)
-        at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
-        at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
-        at java.base/java.lang.Thread.run(Thread.java:1583)
-Detected leader failure, triggering new election
-Detected leader failure, triggering new election
-Detected leader failure, triggering new election
-Detected leader failure, triggering new election
+- PRDT library & protocol implementations (Scala)
+- Performance benchmark
+  - Key/value-store implementation (Scala)
+  - Benchmark scripts (ansible & fish shell scripts)
+  - Analysis scripts (python jupyter notebook)
 
-Detected leader failure, triggering new election
-Exception in thread "pool-1-thread-1" java.lang.IllegalStateException: could not answer request, missing deltas for: Dots(Map(🪪NODE1 -> [29]))
-  relevant: List(Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [28])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890579952,0,-712656600931955414),1749890579952))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [27])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890579852,0,-712656600931955415),1749890579852))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [26])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890579752,0,-712656600931955416),1749890579752))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [25])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890579651,0,-712656600931955417),1749890579651))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [24])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890579551,0,-712656600931955418),1749890579551))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [23])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890579451,0,-712656600931955419),1749890579451))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [22])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890579350,0,-712656600931955420),1749890579350))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [21])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890579249,0,-712656600931955421),1749890579249))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [20])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890579149,0,-712656600931955422),1749890579149))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [19])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890579049,0,-712656600931955423),1749890579049))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [18])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890578949,0,-712656600931955424),1749890578949))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [17])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890578849,0,-712656600931955425),1749890578849))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [16])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890578749,0,-712656600931955426),1749890578749))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [15])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890578649,0,-712656600931955427),1749890578649))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [14])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890578549,0,-712656600931955428),1749890578549))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [13])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890578449,0,-712656600931955429),1749890578449))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [12])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890578349,0,-712656600931955430),1749890578349))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [11])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890578249,0,-712656600931955431),1749890578249))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [10])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890578149,0,-712656600931955432),1749890578149))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [9])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890578049,0,-712656600931955433),1749890578049))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [8])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890577949,0,-712656600931955434),1749890577949))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [7])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890577848,0,-712656600931955435),1749890577848))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [6])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890577748,0,-712656600931955436),1749890577748))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [5])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890577648,0,-712656600931955437),1749890577648))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [4])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890577548,0,-712656600931955438),1749890577548))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [3])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890577448,0,-712656600931955439),1749890577448))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [2])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890577347,0,-712656600931955440),1749890577347))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [1])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890577246,0,-712656600931955441),1749890577246))), Payload(Set(🪪NODE1),Dots(Map(🪪NODE1 -> [0])),Map(🪪NODE1 -> LastWriterWins(CausalTime(1749890577147,0,-712656600931955442),1749890577146))))
-# Hardware Dependencies
+# Download, Installation, and Sanity-Testing
 
-> In the Hardware Dependencies section, describe the hardware required to evaluate the artifact. If the artifact requires specific hardware (e.g., many cores, disk space, GPUs, specific processors), please provide instructions on how to gain access to the hardware. Keep in mind that reviewers must remain anonymous.
+## **Hardware and Software Requirements:**
 
-# Getting Started
- podman run -v ./benchmark-results:/app/benchmark-results --rm -it artifact-test etcd-benchmark-local 10 10 30 mixed
-> In the Getting Started Guide, give instructions for setup and basic testing. List any software requirements and/or passwords needed to access the artifact. The instructions should take roughly 30 minutes to complete. Reviewers will follow the guide during an initial kick-the-tires phase and report issues as they arise.
+The artifact comes with two docker images, one for linux/amd64 and one for linux/arm64. The former should work on any 64 bit x86 system while the latter should work on 64 bit arm machines such as those based on Apple silicon chips.
+
+Within the docker image, you will find everything needed to:
+
+- compile and execute our code
+- run limited local benchmarks
+- run remote benchmarks via ansible
+- analyse the benchmark results and produce the figures from the paper
+
+The remote benchmarks require at least 4 Ubuntu machines (3 for the cluster, 1 for the benchmark runner) that you have SSH access to. For the artifact evaluation period of OOPSLA26, we give the reviewers access to the remote servers that we have used for our evaluation.
+
 >
-> The Getting Started Guide should be as simple as possible, and yet it should stress the key elements of your artifact. Anyone who has followed the Getting Started Guide should have no technical difficulties with the rest of your artifact.
 
-# Step by Step Instruction
+However, if you are reading this after artifact evaluation has ended, you will have to bring your own servers for the remote benchmarks or stick with the local benchmarks.
+In order to run the benchmarks without docker (for improved performance), you will need to install java (JDK 21) and a recent version of the [fish shell](https://fishshell.com/) (we tested 4.2.1 and 4.8.1). All other dependencies are packaged with the artifact.
 
+_Disclaimer: While we aim to support local performance benchmarks, please note that it is generally a bad idea to have the benchmark runner and the benchmarked system on the same machine and that your results will differ from the ones reported in the paper.
+Additionally, local benchmark perfomance in Docker is very suboptimal, especially on non-linux hosts. For these cases, we do support running the benchmark scripts locally without docker._
 
-> In the Step by Step Instructions, explain how to reproduce any experiments or other activities that support the conclusions in your paper. Write this for readers who have a deep interest in your work and are studying it to improve it or compare against it. If your artifact runs for more than a few minutes, point this out, note how long it is expected to run (roughly) and explain how to run it on smaller inputs. Reviewers may choose to run on smaller inputs or larger inputs depending on available resources.
->
-> Be sure to explain the expected outputs produced by the Step by Step Instructions. State where to find the outputs and how to interpret them relative to the paper. If there are any expected warnings or error messages, explain those as well. Ideally, artifacts should include sample outputs and logs for comparison.
+## Download and Installation
 
-# Reusability Guide
+Download the artifact from [https://doi.org/10.5281/zenodo.21442650](https://doi.org/10.5281/zenodo.21442650).
+There you will find two docker images for easy execution and a zip file containing all the sources (code and scripts) used to build the docker images. The latter can be used to change and reuse the artifact, and to run it without docker.
 
-> In the Reusability Guide, explain which parts of your artifact constitute the core pieces which should be evaluated for reusability. Explain how to adapt the artifact to new inputs or new use cases. Provide instructions for how to find/generate/read documentation about the core artifact. Articulate any limitations to the artifact’s reusability.
->
-> If the Artifact Overview is written in a language like Markdown or TeX, then authors are encouraged to upload the rendered output to HotCRP and include the source files in the artifact.
+**TODO: explain file structure**
+
+Make sure that [docker](https://www.docker.com/) is installed on your machine ([podman](https://podman.io/) might work as well).
+Then, pick the right docker image for your architecture and load it using:
+
+```bash
+docker image load -i dockerimage_amd64.tar # for x86
+```
+
+```bash
+docker image load -i dockerimage_arm64.tar # for ARM
+```
+
+If you also want to use the artifact without docker, make sure that you install [fish shell](https://fishshell.com/) and java (>= JDK 21). See the section "Additional Artifact Description" for more details on running the artifact without docker.
+
+## Sanity Testing
+
+After loading the image, copy the `results` folder from the zip file that came with the artifact.
+
+Then, start the docker container from the folder containing the `results` folder:
+
+```bash
+docker run --rm -it -v ./results:/app/results -p 8888:8888 --entrypoint=fish  prdt-artifact
+```
+
+If you are on Linux, also supply the `--tmpfs /tmp` flag to greatly improve benchmark performance:
+
+```bash
+docker run --rm -it -v ./results:/app/results -p 8888:8888 --entrypoint=fish  --tmpfs /tmp prdt-artifact
+```
+
+This should open an interactive shell from which you can run various scripts.
+
+Try running the following command to start a jupyter notebook to analyze the pre-supplied benchmark results. This should print a URL like `http://127.0.0.1:8888/tree?token=...` to your terminal. Copy this URL and paste it into a webbrowser.
+
+```bash
+scripts/run-jupyter.fish
+```
+
+Inside the jupyter menu, select the "Data_Visualization.ipynb" notebook and run it via "Kernel > Restart Kernel and Run All Cells". This should produce several tables and plots.
+Go back to the terminal and press Ctrl-C to stop the jupyter notebook.
+
+Afterwards, try running the following commands to run a local prdt/etcd benchmark respectively. They should take no more than 2 minutes each and should print a summary in the end.
+The benchmark results should also appear in the previously created folder `results`.
+
+```bash
+NUM_NODES=3 THREADS=10 SYSTEM=prdt scripts/run-benchmark-local.fish
+```
+
+```bash
+NUM_NODES=3 THREADS=10 SYSTEM=etcd scripts/run-benchmark-local.fish
+```
+
+Finally, try to run a benchmark on our supplied cloud-infrastructure. This should take around 7 minutes.
+
+```bash
+scripts/run-benchmark-cloud.fish
+```
+
+ENDE CHRISTIAN TEST

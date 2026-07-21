@@ -1,0 +1,13 @@
+[Unit]
+Description=etcd server
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=no
+User=root
+ExecStart=/usr/bin/bash /root/start-etcd.sh
+
+[Install]
+WantedBy=multi-user.target

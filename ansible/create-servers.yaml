@@ -1,0 +1,58 @@
+- name: create nodes
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  user: root
+  vars:
+    hcloud_token: "GVcFJOaB08HIrGqaWluslBY6JhxlTP9G6C2gOM0S8u6eOGLLdaRLXeFJA2Pn0Rva"
+  tasks:
+    - name: Create node servers on hetzner
+      loop: "{{ nodenames }}"
+      hcloud_server:
+        api_token: "{{ hcloud_token }}"
+        name: "fsn-{{ item }}"
+        labels:
+          role: node
+        server_type: ccx23
+        image: ubuntu-24.04
+        location: fsn1
+        state: present
+        # placement_group: falkenstein-spread
+        ssh_keys:
+          - "julian@aurum"
+          - "ragnar@rmgk.de"
+          - "root@prdt-artifact"
+      register: server
+    - meta: refresh_inventory
+
+- name: create client
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  user: root
+  vars:
+    hcloud_token: "Ev6xNDcR0vDAXp2nd1N7Gb13mZIDt89puAnUy3e19zLpOYSh4Q7ZftqUse0autcy"
+  tasks:
+    - name: Create client server on hetzner
+      hcloud_server:
+        api_token: "{{ hcloud_token }}"
+        name: "fsn-client1"
+        labels:
+          role: client
+        server_type: ccx33 # 33 is probably enough
+        image: ubuntu-24.04
+        location: fsn1
+        state: present
+        placement_group: falkenstein-spread
+        ssh_keys:
+          - "julian@aurum"
+          - "ragnar@rmgk.de"
+          - "root@prdt-artifact"
+      register: server
+    - name: Pause for 20 for nodes to become reachable
+      ansible.builtin.pause:
+        seconds: 20
+    - meta: refresh_inventory
+
+- name: setup servers
+  ansible.builtin.import_playbook: setup-servers.yaml

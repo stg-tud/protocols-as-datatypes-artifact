@@ -1,0 +1,20 @@
+- name: remove all servers
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  user: root
+  vars:
+    hcloud_token: "Ev6xNDcR0vDAXp2nd1N7Gb13mZIDt89puAnUy3e19zLpOYSh4Q7ZftqUse0autcy"
+  tasks:
+    - name: remove all clients
+      loop: "{{ groups['clients'] }}"
+      hcloud_server:
+        api_token: "{{ hcloud_token }}"
+        name: "{{ item }}"
+        state: absent
+    - name: remove all nodes
+      loop: "{{ groups['nodes'] }}"
+      hcloud_server:
+        api_token: "{{ hcloud_token }}"
+        name: "{{ item }}"
+        state: absent

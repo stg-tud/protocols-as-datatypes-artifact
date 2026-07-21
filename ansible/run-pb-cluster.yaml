@@ -1,0 +1,37 @@
+# - name: ensure that nodes are set up properly
+#   ansible.builtin.import_playbook: setup-nodes.yaml
+
+- name: setup probench
+  hosts: nodes
+  tasks:
+    - name: add probench start script
+      ansible.builtin.template:
+        src: scripts/start-pb.sh.template
+        dest: /root/start-pb.sh
+        mode: u+x
+    - name: add probench systemd service
+      ansible.builtin.copy:
+        src: scripts/pb-node.service
+        dest: /etc/systemd/system/pb-node.service
+
+- name: start probench nodes
+  hosts: nodes
+  tasks:
+    - name: stop probench systemd service
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+        name: pb-node.service
+        state: stopped
+    - name: stop etcd systemd service
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+        name: etcd-node.service
+        state: stopped
+    - name: Pause for 5 seconds to wait for cluster to shut down
+      ansible.builtin.pause:
+        seconds: 5
+    - name: start probench systemd service
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+        name: pb-node.service
+        state: started
