@@ -1,8 +1,5 @@
-# Minimal example. 'HCLOUD_TOKEN' is exposed in environment.
 plugin: hetzner.hcloud.hcloud
 api_token: "GVcFJOaB08HIrGqaWluslBY6JhxlTP9G6C2gOM0S8u6eOGLLdaRLXeFJA2Pn0Rva"
-#locations:
-#  - fsn1
 status:
   - running
 keyed_groups:

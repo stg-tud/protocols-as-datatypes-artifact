@@ -43,9 +43,11 @@ RUN sbt --version
 # USER artifact
 
 # install python dependencies for jupyter
-COPY analysis /app/analysis
+RUN mkdir -p /app/analysis
+COPY analysis/Data_Visualization.ipynb /app/analysis/
+COPY analysis/Pipfile /app/analysis/
+COPY analysis/Pipfile.lock /app/analysis/
 WORKDIR /app/analysis
-RUN rm -rf .venv
 RUN ["pipenv", "install"]
 
 # install ansible deps
@@ -71,5 +73,5 @@ COPY Justfile /app/Justfile
 RUN ["fish",  "-c", "set -Ux jarspath /app/jars"]
 
 WORKDIR /app
-ENTRYPOINT [ "just" ]
-CMD [ "--choose" ]
+ENTRYPOINT [ "fish" ]
+#CMD [ "--choose" ]

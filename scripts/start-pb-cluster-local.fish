@@ -6,8 +6,6 @@ if not set -q NUM_NODES
 end
 set LEADER_TIMEOUT 50000
 
-set bismuthdir "/home/work/Documents/phd/Darmstadt/REScala"
-
 echo "Starting PRDT cluster with $NUM_NODES nodes"
 
 if not set -q jarspath
@@ -19,6 +17,7 @@ if not set -q jarspath
 end
 
 # echo $jarspath
+mkdir -p /tmp/pb
 
 for nodeId in (seq 1 $NUM_NODES)
     set cluster (string replace -r '(\d+)' 'localhost:8${1}11' (seq 1 $nodeId))
@@ -30,7 +29,7 @@ for nodeId in (seq 1 $NUM_NODES)
         --cluster $cluster \
         --initial-cluster-ids (string replace -r '(\d+)' 'NODE$1' (seq 1 $NUM_NODES)) \
         --delta-storage-type 'keep-all' \
-        --timeout $LEADER_TIMEOUT &> PRDTnode$nodeId.log.txt &
+        --timeout $LEADER_TIMEOUT &> /tmp/pb/PRDTnode$nodeId.log.txt &
     echo "Node $nodeId started with cluster $cluster"
     set node_processes $node_processes (jobs -pl)
     sleep 1

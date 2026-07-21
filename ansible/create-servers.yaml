@@ -31,7 +31,7 @@
   gather_facts: False
   user: root
   vars:
-    hcloud_token: "Ev6xNDcR0vDAXp2nd1N7Gb13mZIDt89puAnUy3e19zLpOYSh4Q7ZftqUse0autcy"
+    hcloud_token: "GVcFJOaB08HIrGqaWluslBY6JhxlTP9G6C2gOM0S8u6eOGLLdaRLXeFJA2Pn0Rva"
   tasks:
     - name: Create client server on hetzner
       hcloud_server:
