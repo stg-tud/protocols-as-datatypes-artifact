@@ -1,0 +1,139 @@
+- name: create nodes
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  user: root
+  vars:
+    hcloud_token: "GVcFJOaB08HIrGqaWluslBY6JhxlTP9G6C2gOM0S8u6eOGLLdaRLXeFJA2Pn0Rva"
+    locations: ["ash", "fsn1", "sin"]
+    nodenames: ["node1", "node2", "node3"]
+  tasks:
+    - name: Create distributed node servers on hetzner
+      loop: "{{ locations | product(nodenames) | list }}"
+      hcloud_server:
+        api_token: "{{ hcloud_token }}"
+        name: "{% if item[0] == 'fsn1' and item[1] == 'node1' %}00leader-{% endif %}{{ item[0] }}-{{ item[1] }}"
+        labels:
+          role: node
+          location: geo-repl
+        server_type: ccx23
+        image: ubuntu-24.04
+        location: "{{ item[0] }}"
+        state: present
+        ssh_keys:
+          - "julian@aurum"
+          - "ragnar@rmgk.de"
+          - "root@prdt-artifact"
+      register: server
+    - meta: refresh_inventory
+
+- name: create client
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  user: root
+  vars:
+    hcloud_token: "GVcFJOaB08HIrGqaWluslBY6JhxlTP9G6C2gOM0S8u6eOGLLdaRLXeFJA2Pn0Rva"
+  tasks:
+    - name: Create client server on hetzner
+      hcloud_server:
+        api_token: "{{ hcloud_token }}"
+        name: "fsn-client1"
+        labels:
+          role: client
+        server_type: ccx33 # 33 is probably enough
+        image: ubuntu-24.04
+        location: fsn1
+        state: present
+        placement_group: falkenstein-spread
+        ssh_keys:
+          - "julian@aurum"
+          - "ragnar@rmgk.de"
+          - "root@prdt-artifact"
+      register: server
+    - name: Pause for 30 for nodes to become reachable
+      ansible.builtin.pause:
+        seconds: 30
+    - meta: refresh_inventory
+
+- name: Install etcd
+  hosts: nodes
+  tasks:
+    - name: download etcd archive
+      retries: 5
+      ansible.builtin.get_url:
+        url: https://github.com/etcd-io/etcd/releases/download/v3.6.7/etcd-v3.6.7-linux-amd64.tar.gz
+        dest: /root/etcd.tar.gz
+        checksum: sha256:cf8af880c5a01ee5363cefa14a3e0cb7e5308dcf4ed17a6973099c9a7aee5a9a
+    - name: unpack etcd archive
+      ansible.builtin.unarchive:
+        remote_src: yes
+        src: /root/etcd.tar.gz
+        dest: /root
+        mode: u+x
+    - name: add etcd to path
+      ansible.builtin.file:
+        src: /root/etcd-v3.6.7-linux-amd64/etcd
+        dest: /usr/local/bin/etcd
+        state: link
+    - name: add etcdctl to path
+      ansible.builtin.file:
+        src: /root/etcd-v3.6.7-linux-amd64/etcdctl
+        dest: /usr/local/bin/etcdctl
+        state: link
+    - name: add etcd systemd service
+      ansible.builtin.copy:
+        src: scripts/etcd-node.service
+        dest: /etc/systemd/system/etcd-node.service
+
+- name: Install dependencies
+  hosts: all
+  tasks:
+    - name: install java
+      ansible.builtin.apt:
+        name: openjdk-25-jdk
+        state: present
+        update_cache: true
+    - name: install fish
+      ansible.builtin.apt:
+        name: fish
+        state: present
+    - name: install rsync
+      ansible.builtin.apt:
+        name: fish
+        state: present
+
+- name: Install probench
+  hosts: all
+  tasks:
+    #  - name: install unzip
+    #    ansible.builtin.apt:
+    #      name: unzip
+    #      state: present
+    - name: Ensure probench directory exists
+      ansible.builtin.file:
+        path: /root/probench/lib
+        state: directory
+    - name: copy jars using rsync
+      retries: 5
+      ansible.posix.synchronize:
+        src: "/app/jars/"
+        dest: /root/probench/lib
+        delete: true
+        use_ssh_args: true
+    #  - name: install probench package
+    #    ansible.builtin.unarchive:
+    #      src: probench.zip
+    #      dest: /root/probench/lib
+    - name: add probench systemd service
+      ansible.builtin.copy:
+        src: scripts/pb-node.service
+        dest: /etc/systemd/system/pb-node.service
+
+- name: Install YCSB
+  hosts: clients
+  tasks:
+    - name: copy ycsb jar
+      ansible.builtin.copy:
+        src: ycsb-core.jar
+        dest: /root
