@@ -65,6 +65,7 @@ COPY workloads/workloadb /app/workloads/workloadb
 COPY bin/etcd/ /app/etcd
 COPY ansible /app/ansible
 COPY prdt-artifact /root/.ssh/id_ed25519
+RUN chmod 600 /root/.ssh/id_ed25519
 COPY .ansible.cfg /root/.ansible.cfg
 
 
