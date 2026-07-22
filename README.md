@@ -133,17 +133,32 @@ By default, the notebook considers the **3 newest runs** per configuration (same
 
 **Populating a dataset:**
 
-In order to add new data to a dataset or create a new dataset, you can use the scripts in the `scripts` folder.
+In order to create a new dataset `my_dataset`, restart the container (Ctrl-C, Ctrl-D):
 
-> Disclaimer: the cloud scripts should only be executed one at a time (by one reviewer at a time) because they will run on the same infrastructure, which will affect the results.
+```bash
+mkdir my_dataset
+docker run --rm -it -v ./my_dataset:/app/results -p 8888:8888  prdt-artifact
+```
 
-You can produce a complete dataset (read/write benchmarks, leader failure, geo-replication, 3 runs per config) with the following command. **Beware: The script takes about 12h to finish.**
+You can then use the scripts in the `scripts` folder to populate the dataset.
+
+> _Disclaimer: the cloud scripts should only be executed one at a time (by one reviewer at a time) because they will run on the same infrastructure, which will affect the results._
+
+You can produce a complete dataset (read/write benchmarks, leader failure, geo-replication, 3 runs per config) with the following command. **Beware: The script takes about 17h to finish.**
 
 ```bash
 scripts/all-benchmarks.fish
 ```
 
-You can run individual cloud benchmarks using:
+For a slightly quicker option, you can run individual benchmark scripts:
+
+```bash
+scripts/datacententer-benchmarks.fish # ~10h
+scripts/geo-repl-benchmarks.fish # ~5h
+scripts/leader-failure-benchmark.fish # ~80min
+```
+
+For the quickest option, you can run a single cloud benchmark using:
 
 ```bash
 NUM_NODES=3 THREADS=10 WORKLOAD=writeonly scripts/run-benchmark-cloud.fish
