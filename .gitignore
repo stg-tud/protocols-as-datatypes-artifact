@@ -5,5 +5,10 @@ data
 .zed
 .vscode
 target
-bin
 benchmark-results
+results*
+.ipynb_checkpoints
+.venv
+analysis/output
+analysis/*.pdf
+analysis/*.png
