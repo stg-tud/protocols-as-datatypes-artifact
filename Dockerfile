@@ -55,14 +55,14 @@ RUN ansible-galaxy collection install -f hetzner.hcloud
 
 # copy PRDT source
 # TODO: maybe actually compile in here
-COPY jars /app/jars
+COPY bin/jars /app/jars
 
 COPY scripts /app/scripts
-COPY ycsb-core.jar /app/
+COPY bin/ycsb-core.jar /app/
 COPY benchConfig /app/
 COPY workloads/writeonly /app/workloads/writeonly
 COPY workloads/workloadb /app/workloads/workloadb
-COPY etcd/ /app/etcd
+COPY bin/etcd/ /app/etcd
 COPY ansible /app/ansible
 COPY prdt-artifact /root/.ssh/id_ed25519
 COPY .ansible.cfg /root/.ansible.cfg
