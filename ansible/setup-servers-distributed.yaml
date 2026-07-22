@@ -135,5 +135,5 @@
   tasks:
     - name: copy ycsb jar
       ansible.builtin.copy:
-        src: ycsb-core.jar
+        src: "/app/ycsb-core.jar"
         dest: /root
