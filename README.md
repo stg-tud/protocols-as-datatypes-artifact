@@ -129,6 +129,7 @@ scripts/run-jupyter.fish
 
 In the command output, look for a line containing an URL like `http://127.0.0.1:8888/tree?token=...`, copy the URL and open it with a browser. In jupyter, select and open the `Data_Visualization.ipynb` notebook. You can run it via “Kernel > Restart Kernel and Run All Cells”. This will produce the figures from the Evaluation section of the paper.
 The notebook also allows you to inspect the data interactively and create new analyses.
+By default, the notebook considers the **3 newest runs** per configuration (same workload, same number of servers, same system).
 
 **Populating a dataset:**
 
