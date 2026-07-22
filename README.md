@@ -56,7 +56,7 @@ docker image load -i dockerimage_amd64.tar # for x86
 docker image load -i dockerimage_arm64.tar # for ARM
 ```
 
-## Sanity Testing
+## Sanity Testing (kick-the-tires)
 
 **Visualizing the Benchmark Results:**
 
