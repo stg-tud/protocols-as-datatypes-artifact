@@ -194,10 +194,13 @@ While the exact performance numbers are dependent on the performance of the clou
 See the following figures for a comparison between the performance measurements that we conducted at paper submission time (first) and during artifact preparation (second).
 We expect the reviewers to observe numbers similar to the latter plots.
 
-**Paper Submission:**
+**Paper Results:**
+
 ![](img/through_lat_both_read.png)
 ![](img/through_lat_both_write.png)
-**Artifact Submission:**
+
+**Artifact Preparation Results** (changes are due to higher overall network latency, but still show the same trends):
+
 ![](img/through_lat_both_read_artifact.png)
 ![](img/through_lat_both_write_artifact.png)
 
