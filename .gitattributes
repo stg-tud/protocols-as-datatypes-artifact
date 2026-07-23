@@ -237,3 +237,4 @@ bin/etcd-v3.6.7-linux-amd64/Documentation/etcd-internals/diagrams/write_workflow
 bin/etcd-v3.6.7-linux-amd64/Documentation/etcd-internals/diagrams/write_workflow_leader.png filter=lfs diff=lfs merge=lfs -text
 datasets filter=lfs diff=lfs merge=lfs -text
 datasets/** filter=lfs diff=lfs merge=lfs -text
+bin/** filter=lfs diff=lfs merge=lfs -text

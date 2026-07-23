@@ -12,3 +12,4 @@ results*
 analysis/output
 analysis/*.pdf
 analysis/*.png
+.stainless-cache
