@@ -1,0 +1,4 @@
+[submodule "src/bismuth"]
+	path = src/bismuth
+	url = git@github.com:stg-tud/Bismuth.git
+	branch = prdt-oopsla26-artifact
