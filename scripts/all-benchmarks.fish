@@ -1,6 +1,6 @@
 #! /usr/bin/env fish
 # create 3 servers
-ansible-playbook -i ansible/hCloudInventory.hcloud.yaml -i ansible/inventory.yaml --extra-vars '{"bismuthdir": "/home/julian/Nextcloud/Uni/phd/Darmstadt/REScala", "nodenames": ["node1", "node2", "node3"]}' ansible/create-servers.yaml
+ansible-playbook -i ansible/hCloudInventory.hcloud.yaml -i ansible/inventory.yaml --extra-vars '{"nodenames": ["node1", "node2", "node3"]}' ansible/create-servers.yaml
 set -x SERVERS 3
 
 set datacenter3TimeStart (date +%Y-%m-%d-%T:%z)
@@ -16,7 +16,7 @@ set leaderFailureTimeEnd (date +%Y-%m-%d-%T:%z)
 echo "leader failure benchmark started at $leaderFailureTimeStart, ended at $leaderFailureTimeEnd" >> /app/results/timing.txt
 
 # create 5 servers
-ansible-playbook -i ansible/hCloudInventory.hcloud.yaml -i ansible/inventory.yaml --extra-vars '{"bismuthdir": "/home/julian/Nextcloud/Uni/phd/Darmstadt/REScala", "nodenames": ["node1", "node2", "node3", "node4", "node5"]}' ansible/create-servers.yaml
+ansible-playbook -i ansible/hCloudInventory.hcloud.yaml -i ansible/inventory.yaml --extra-vars '{"nodenames": ["node1", "node2", "node3", "node4", "node5"]}' ansible/create-servers.yaml
 set -x SERVERS 5
 
 set datacenter5TimeStart (date +%Y-%m-%d-%T:%z)

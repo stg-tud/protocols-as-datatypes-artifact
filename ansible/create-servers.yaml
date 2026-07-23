@@ -19,8 +19,6 @@
         state: present
         placement_group: falkenstein-spread
         ssh_keys:
-          - "julian@aurum"
-          - "ragnar@rmgk.de"
           - "root@prdt-artifact"
       register: server
     - meta: refresh_inventory
@@ -45,8 +43,6 @@
         state: present
         placement_group: falkenstein-spread
         ssh_keys:
-          - "julian@aurum"
-          - "ragnar@rmgk.de"
           - "root@prdt-artifact"
       register: server
     - name: Pause for 40 for nodes to become reachable
