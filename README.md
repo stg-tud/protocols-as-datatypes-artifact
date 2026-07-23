@@ -182,6 +182,27 @@ See the reproducibility guidelines for further discussion.
 
 # Reusability guidelines
 
+The main reusable component of our artifact is the PRDT library (written in Scala) that allows users to implement new protocols through composition (see Section 4 of the paper for a tour).
+We develop the library in the context of the Bismuth project and our PRDT components are included in its RDT library. Development happens on [Github](https://github.com/stg-tud/Bismuth) and we publish [Maven artifacts](https://index.scala-lang.org/stg-tud/bismuth/artifacts/rdts?pre-releases=false) that allow developers to easily include the library into their Scala projects. The code is licensed under Apache License 2.0 license.
+
+We also include the library as part of this artifact in the `src` folder. The version included in this artifact is also available under the https://github.com/stg-tud/Bismuth/tree/prdt-oopsla26-artifact branch.
+
+## Navigating the Source Code
+
+See `src/Bismuth/Modules/RDTs/src/main/scala/rdts/protocols` for everything PRDT related. This includes a slightly extended version of the `Paxos` implementation from the paper, the `MultiPaxos` implementation that we use in our benchmarks, and other components such as `Voting` that we introduce in Section 2 of the paper.
+
+**TODO: we also include the different Paxos Variants from section 4.2 of the paper.**
+
+Our key-value store implementation as well as the YCSB adapters used for our performance evaluation can be inspected in the `src/Bismuth/Modules/Protocol Benchmarks` module.
+
+## Implementing Custom PRDTs (reusability scenario)
+
+Section 4.2 of the paper already sketches how one could start designing custom PRDTs for various scenarios.
+In order to allow further experimentation with the library, we include an example Scala project in `src/example-project`.
+
+This project demonstrates how to use the PRDT library as a dependency in order to implement custom protocols.
+Load the 
+
 # Reproducibility guidelines
 
 Our evaluation makes one central claim:
