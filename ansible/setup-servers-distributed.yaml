@@ -51,9 +51,9 @@
           - "ragnar@rmgk.de"
           - "root@prdt-artifact"
       register: server
-    - name: Pause for 30 for nodes to become reachable
+    - name: Pause for 50 for nodes to become reachable
       ansible.builtin.pause:
-        seconds: 30
+        seconds: 50
     - meta: refresh_inventory
 
 - name: Install etcd

@@ -49,9 +49,9 @@
           - "ragnar@rmgk.de"
           - "root@prdt-artifact"
       register: server
-    - name: Pause for 20 for nodes to become reachable
+    - name: Pause for 40 for nodes to become reachable
       ansible.builtin.pause:
-        seconds: 20
+        seconds: 40
     - meta: refresh_inventory
 
 - name: setup servers
