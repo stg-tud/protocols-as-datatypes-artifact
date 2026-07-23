@@ -27,9 +27,9 @@ case class ParallelMultiPaxos[A](
     // return values in log order but only if all previous rounds are decided
     NumericRange(0L, log.size.toLong, 1L).view
       .flatMap(log.get)
-      // .filter(_.result.isDefined) // TODO: THIS IS A BUG!
+      .filter(_.result.isDefined) // TODO: THIS IS A BUG!
       // FIX: return log until first undecided round
-      .takeWhile(_.result.isDefined)
+      //.takeWhile(_.result.isDefined)
       .map(_.result.get)
       .toList
 

@@ -53,9 +53,14 @@ RUN ["pipenv", "install"]
 # install ansible deps
 RUN ansible-galaxy collection install -f hetzner.hcloud
 
-# copy PRDT source
-# TODO: maybe actually compile in here
+# copy PRDT source & jars
 COPY bin/jars /app/jars
+COPY src/ /app/src/
+# ensure sbt dependencies are downloaded
+WORKDIR /app/src/bismuth
+RUN ["sbt", "publishLocal"]
+WORKDIR /app/src/example-project
+RUN ["sbt", "test:compile"]
 
 COPY scripts /app/scripts
 COPY bin/ycsb-core.jar /app/
