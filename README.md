@@ -200,8 +200,91 @@ Our key-value store implementation as well as the YCSB adapters used for our per
 Section 4.2 of the paper already sketches how one could start designing custom PRDTs for various scenarios.
 In order to allow further experimentation with the library, we include an example Scala project in `src/example-project`.
 
-This project demonstrates how to use the PRDT library as a dependency in order to implement custom protocols.
-Load the 
+This project demonstrates how to use the PRDT library as a dependency in order to implement custom protocols. It implements an optimized version of the MultiPaxos presented in the paper (Section 4.3).
+
+Load the project in sbt (a Scala build tool) using:
+
+```bash
+docker run --rm -it -v ./src/example-project:/app --entrypoint sbt prdt-artifact
+```
+
+Verify that the project compiles by entering `compile` into the sbt shell.
+
+Next, open the file `example-project/src/main/scala/ParallelMultiPaxos.scala` in your favourite text editor.
+
+The idea behind `ParallelMultiPaxos` is to allow multiple Paxos instances to be run in parallel using one instance for each log entry. This is reflected by the case class definition:
+
+```scala
+case class ParallelMultiPaxos[A](
+    log: Map[Long, Paxos[A]] = Map.empty[Long, Paxos[A]],
+    commitIndex: Long = -1
+)
+```
+
+The log is a map from log index to Paxos instance. In addition, we keep a commit index that tracks which Paxos instances have come to a decision. An index of 2 would mean that instances 0-2 are decided already.
+
+Given this case class definition, our library can derive a merge function semi-automatically. Look for the following code at the bottom of the file:
+
+```scala
+given [A]: Lattice[ParallelMultiPaxos[A]] =
+  given Lattice[Long] = Math.max
+  Lattice.derived
+```
+
+We only need to define how to merge Longs (for the commit index) and the rest can be derived automatically because the library already knows how to merge Maps of `Paxos` instances.
+
+Next, look at the `read` function of ParallelMultiPaxos:
+
+```scala
+def read(using Participants): List[A] =
+  // return values in log order but only if all previous rounds are decided
+  NumericRange(0L, log.size.toLong, 1L).view
+    .flatMap(log.get)
+    .filter(_.result.isDefined) // TODO: THIS IS A BUG!
+    // FIX: return log until first undecided round
+    //.takeWhile(_.result.isDefined)
+    .map(_.result.get)
+    .toList
+```
+
+`read` simply checks which Paxos instances already have a result (have come to a decision), and returns their values sorted by log index.
+However, the current implementation contains a bug: It simply ignores undecided log entries and might return a decision for slot 2 before there is a decision for slot 1. This violates `action monotonicity` (Definition 3.7) because we could go from `Log(2)` to `Log(1,2)` which violates the standard decision order for log-based consensus which is that we can only _append_ to the log!
+
+Our PRDT library makes it easy to catch these kinds of bugs in a Scala project and generate counter-examples through property-based testing.
+The file `example-project/src/test/scala/PropertyBasedParallelMultipaxos.scala` demonstrates how to implement a simple property-based test suite. The test suite simulates a number of `ParallelMultipaxos` instances, executes a series random protocol actions for each instance and merges the instances from time to time to simulate network communication.
+
+Run the test by entering `test` into the sbt shell. This should fail and print some relatively verbose output. Scroll up to find the failing property. The output should print one of the following properties (the exact values might differ):
+
+```
+every log is a prefix of another log or vice versa, but we had:
+left: List(-1102037233, -1)
+right: List(-1)
+```
+
+```
+local logs grow monotonically, but went from
+List() to List()
+and
+List(1798591263) to List(1770191727, 1798591263)
+```
+
+In order to fix the bug, go back to `ParallelMultiPaxos.scala` and replace the `.filter` line by the `takeWhile` line as indicated by the comments.
+This changes our read logic such that we return the results of the individual Paxos instances in order and do not skip over undecided entries.
+Your new version should look like this:
+
+```scala
+def read(using Participants): List[A] =
+  // return values in log order but only if all previous rounds are decided
+  NumericRange(0L, log.size.toLong, 1L).view
+    .flatMap(log.get)
+    //.filter(_.result.isDefined) // TODO: THIS IS A BUG!
+    // FIX: return log until first undecided round
+    .takeWhile(_.result.isDefined)
+    .map(_.result.get)
+    .toList
+```
+
+Rerun the test by entering `test` in the sbt shell. The output should report all tests as succeeded.
 
 # Reproducibility guidelines
 
