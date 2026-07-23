@@ -231,6 +231,14 @@ given votingPRDTProof[A]: Consensus[Voting[A]] with {
               (voter2.uid, cand2),
               voter1.uid
             )
+            check(s1.participants.contains(voter1.uid))
+            check(!s1.votesMap.contains(voter1.uid))
+            check(voter1 == n1)
+            check(e1 == VotingEffect.voteFor(voter1, cand1))
+            check(precond(s1, e1, n1) == (s1.precond(using n1) && voter1 == n1))
+            check(precond(s1, e1, n1))
+
+            true
       })
   }
 
