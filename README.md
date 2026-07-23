@@ -85,10 +85,10 @@ Next, we are going to perform a benchmark run on our supplied cloud-infrastructu
 
 Go back to the terminal running the jupyter notebook and stop it with Ctrl-C. Then, stop the running docker container (e.g. via Ctrl-D).
 
-Create a folder to hold your benchmark results, e.g. `myresults`. Then mount it into the docker container using
+Create a folder to hold your benchmark results, e.g. `my_dataset`. Then mount it into the docker container using
 
 ```bash
-docker run --rm -it -v ./myresults:/app/results -p 8888:8888  prdt-artifact
+docker run --rm -it -v ./my_dataset:/app/results -p 8888:8888  prdt-artifact
 ```
 
 Try to run a benchmark on our supplied cloud-infrastructure:
@@ -180,7 +180,7 @@ However, this affects both systems equally, and thus the general trends and obse
 
 See the reproducibility guidelines for further discussion.
 
-# Reusability guidelines
+# Reusability Guidelines
 
 The main reusable component of our artifact is the PRDT library (written in Scala) that allows users to implement new protocols through composition (see Section 4 of the paper for a tour).
 We develop the library in the context of the Bismuth project and our PRDT components are included in its RDT library. Development happens on [Github](https://github.com/stg-tud/Bismuth) and we publish [Maven artifacts](https://index.scala-lang.org/stg-tud/bismuth/artifacts/rdts?pre-releases=false) that allow developers to easily include the library into their Scala projects. The code is licensed under Apache License 2.0 license.
@@ -294,7 +294,6 @@ This claim can be evaluated by running the `all-benchmarks.fish` script and comp
 While the exact performance numbers are dependent on the performance of the cloud environment, this should affect both systems and should not violate our main claim of comparable performance.
 
 See the following figures for a comparison between the performance measurements that we conducted at paper submission time (first) and during artifact preparation (second).
-We expect the reviewers to observe numbers similar to the latter plots.
 
 **Paper Results:**
 
@@ -308,7 +307,8 @@ We expect the reviewers to observe numbers similar to the latter plots.
 
 # Additional artifact description
 
-There are several folders of the artifact that were not discussed in the previous sections:
+This section describes additional parts of the artifact that were not discussed in the previous sections which might be interesting for the curious reader beyond artifact evaluation.
+At the end of the section we also provide some troubleshooting guidance if anything goes wrong while following the evaluation instructions.
 
 ## `/ansible`:
 
@@ -349,3 +349,16 @@ You can try to verify our stainless implementations by running the following fro
 ## `/scripts/local`
 
 The scripts in this folder demonstrate how to run a local cluster of our key-value store or etcd respectively. They could be used as a basis for running local experiments. However, one should note that it is generally not a good idea to have the benchmark driver and the system being stress-tested on the same machine because this will slow down the benchmark as well.
+
+## Troubleshooting
+
+**The ansible script is taking longer than expected/seems to hang/is throwing error messages.**
+
+Some of the scripts can be a bit flaky/unpredictable. Try stopping the script via Ctrl-C.
+Then, reset the servers by running.
+
+```bash
+scripts/remove-all-servers.fish
+```
+
+This removes all cloud servers such that the next script can start in a clean state.
