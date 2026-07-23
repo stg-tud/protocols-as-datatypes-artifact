@@ -43,8 +43,6 @@ Additionally, local benchmark perfomance in Docker is very suboptimal, especiall
 Download the artifact from [https://doi.org/10.5281/zenodo.21442650](https://doi.org/10.5281/zenodo.21442650).
 There you will find two docker images for easy execution and a zip file containing all the sources (code and scripts) used to build the docker images. The latter can be used to change and reuse the artifact, and to run it without docker.
 
-**TODO: explain file structure**
-
 Make sure that [docker](https://www.docker.com/) is installed on your machine ([podman](https://podman.io/) might work as well).
 Then, pick the right docker image for your architecture and load it using:
 
@@ -60,7 +58,7 @@ docker image load -i dockerimage_arm64.tar # for ARM
 
 **Visualizing the Benchmark Results:**
 
-After loading the image, copy the `paper_dataset` folder from the zip file that came with the artifact. It contains the benchmark results that were used to produce the figures in the paper.
+After loading the image, copy the `/datasets/paper_dataset` folder from the zip file that came with the artifact. It contains the benchmark results that were used to produce the figures in the paper.
 
 Then, start the docker container from the folder containing the `paper_dataset` folder:
 
@@ -127,9 +125,10 @@ To analyze a dataset, run our jupyter notebook with:
 scripts/run-jupyter.fish
 ```
 
-In the command output, look for a line containing an URL like `http://127.0.0.1:8888/tree?token=...`, copy the URL and open it with a browser. In jupyter, select and open the `Data_Visualization.ipynb` notebook. You can run it via “Kernel > Restart Kernel and Run All Cells”. This will produce the figures from the Evaluation section of the paper.
-The notebook also allows you to inspect the data interactively and create new analyses.
-By default, the notebook considers the **3 newest runs** per configuration (same workload, same number of servers, same system).
+In the command output, look for a line containing an URL like `http://127.0.0.1:8888/tree?token=...`, copy the URL and open it with a browser. In jupyter, select and open one of the three notebooks corresponding to the benchmark you want to analyze. You can run the notebook via “Kernel > Restart Kernel and Run All Cells”. This will produce the figures from the Evaluation section of the paper.
+The notebooks also allows you to inspect the data interactively and create new analyses.
+
+By default, each notebook considers the **3 newest runs** per configuration (same workload, same number of servers, same system).
 
 **Populating a dataset:**
 
@@ -145,9 +144,10 @@ You can then use the scripts in the `scripts` folder to populate the dataset.
 > _Disclaimer: the cloud scripts should only be executed one at a time (by one reviewer at a time) because they will run on the same infrastructure, which will affect the results._
 
 You can produce a complete dataset (read/write benchmarks, leader failure, geo-replication, 3 runs per config) with the following command. **Beware: The script takes about 17h to finish.**
+You can control the `RUNS` variable to do less runs per config.
 
 ```bash
-scripts/all-benchmarks.fish
+RUNS=3 scripts/all-benchmarks.fish
 ```
 
 For a slightly quicker option, you can run individual benchmark scripts:
@@ -191,11 +191,9 @@ We also include the library as part of this artifact in the `src` folder. The ve
 
 See `src/Bismuth/Modules/RDTs/src/main/scala/rdts/protocols` for everything PRDT related. This includes a slightly extended version of the `Paxos` implementation from the paper, the `MultiPaxos` implementation that we use in our benchmarks, and other components such as `Voting` that we introduce in Section 2 of the paper.
 
-**TODO: we also include the different Paxos Variants from section 4.2 of the paper.**
-
 Our key-value store implementation as well as the YCSB adapters used for our performance evaluation can be inspected in the `src/Bismuth/Modules/Protocol Benchmarks` module.
 
-## Implementing Custom PRDTs (reusability scenario)
+## Implementing Custom PRDTs (Reusability Scenario)
 
 Section 4.2 of the paper already sketches how one could start designing custom PRDTs for various scenarios.
 In order to allow further experimentation with the library, we include an example Scala project in `src/example-project`.
@@ -308,25 +306,46 @@ We expect the reviewers to observe numbers similar to the latter plots.
 ![](img/through_lat_both_read_artifact.png)
 ![](img/through_lat_both_write_artifact.png)
 
-# Additional artifact description (file structure, guidelines for extending the tool or adding new examples, etc.)
+# Additional artifact description
 
-<!-- If you also want to use the artifact without docker, make sure that you install [fish shell](https://fishshell.com/) and java (>= JDK 21). See the section "Additional Artifact Description" for more details on running the artifact without docker. -->
+There are several folders of the artifact that were not discussed in the previous sections:
 
-> In the Hardware Dependencies section, describe the hardware required to evaluate the artifact. If the artifact requires specific hardware (e.g., many cores, disk space, GPUs, specific processors), please provide instructions on how to gain access to the hardware. Keep in mind that reviewers must remain anonymous.
+## `/ansible`:
 
-If you are on Linux, also supply the `--tmpfs /tmp` flag to greatly improve benchmark performance:
+Contains various ansible playbooks that we use to setup the servers, install the necessary software and orchestrate the different benchmark scripts. Refer to the scripts in `/scripts` to see how they are called.
+We believe they are fairly reusable and could potentially serve as a foundation for benchmarking other systems with YCSB.
 
-```bash
-docker run --rm -it -v ./results:/app/results -p 8888:8888 --entrypoint=fish  --tmpfs /tmp prdt-artifact
+If you want to run the scripts without our supplied infrastructure, you need at least 4 Ubuntu machines (1 for the benchmark runner, 3 for the nodes) that you have ssh access to. Then, prepare an [ansible inventory](https://docs.ansible.com/projects/ansible/latest/inventory_guide/intro_inventory.html) for your machines. You need to define the groups `nodes` and `clients`:
+
+```yaml
+# myinventory.yaml
+nodes:
+  hosts:
+    one.example.com:
+    two.example.com:
+    three.example.com:
+clients:
+  hosts:
 ```
 
-Afterwards, try running the following commands to run a local prdt/etcd benchmark respectively. They should take no more than 2 minutes each and should print a summary in the end.
-The benchmark results should also appear in the previously created folder `results`.
+Afterwards, use your inventory like this:
 
 ```bash
-NUM_NODES=3 THREADS=10 SYSTEM=prdt scripts/run-benchmark-local.fish
+ansible-playbook -i myinventory.yaml ansible/setup-servers.yaml
 ```
 
+## `/src/stainless`:
+
+This includes the stainless proofs for the `Voting` and `Paxos` data types presented in the paper. `Consensus.scala` demonstrates how we encode the consensus trait from Figure 6 of the paper.
+Both `Voting` and `Paxos` contain instantiations of this trait which serve as a proof of the PRDT safety properties derived in Section 3.3 of the paper.
+
+We used stainless vesion 0.9.9.1 which we include in the `/bin` folder.
+You can try to verify our stainless implementations by running the following from the folder with the stainless binary fitting your system:
+
 ```bash
-NUM_NODES=3 THREADS=10 SYSTEM=etcd scripts/run-benchmark-local.fish
+./stainless --solvers=smt-z3,smt-cvc5 --timeout=600 ../../src/stainless/src/main/scala/*.scala
 ```
+
+## `/scripts/local`
+
+The scripts in this folder demonstrate how to run a local cluster of our key-value store or etcd respectively. They could be used as a basis for running local experiments. However, one should note that it is generally not a good idea to have the benchmark driver and the system being stress-tested on the same machine because this will slow down the benchmark as well.
