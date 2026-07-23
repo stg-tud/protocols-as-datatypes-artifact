@@ -10,6 +10,9 @@ echo "Starting PRDT cluster with $NUM_NODES nodes"
 
 if not set -q jarspath
     echo "jarspath not set: Compiling project with sbt"
+    if not set -q bismuthdir
+		echo "bismuthdir not set! try relaunching with bismuthdir=..."
+	end
 	set oldPath $PWD
 	cd $bismuthdir
 	set jarspath (sbt --error "print proBench/packageJars")
