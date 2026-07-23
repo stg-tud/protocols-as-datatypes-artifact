@@ -76,7 +76,7 @@ class ParallelMultiPaxosSpec[A: Arbitrary](
     for (left, right) <- genId2(state)
     yield Merge(left, right)
 
-  // commands: (merge), upkeep, write, addMember, removeMember
+  // protocol actions: merge, propose, startElection
   case class Merge(left: LocalUid, right: LocalUid) extends ACommand(left):
     override def nextLocalState(
         states: Map[LocalUid, ParallelMultiPaxos[A]]
@@ -98,11 +98,11 @@ class ParallelMultiPaxosSpec[A: Arbitrary](
             val (oldLog1, oldLog2) = (oldMultipaxos1.read, oldMultipaxos2.read)
             (log1.isPrefix(log2) || log2.isPrefix(
               log1
-            )) :| s"every log is a prefix of another log or vice versa, but we had:\nleft:${multipaxos1.read}\nright:${multipaxos2.read}" &&
+            )) :| s"every log is a prefix of another log or vice versa, but we had:\nleft: ${multipaxos1.read}\nright: ${multipaxos2.read}" &&
             // ((multipaxos1.rounds.counter != multipaxos2.rounds.counter) || multipaxos1.leader.isEmpty || multipaxos2.leader.isEmpty || (multipaxos1.leader == multipaxos2.leader)) :| s"There can only ever be one leader for a given epoch but we got:\n${multipaxos1.leader}\n${multipaxos2.leader}" &&
             (log1.isPrefix(oldLog1) && log2.isPrefix(
               oldLog2
-            )) :| s"local logs grow monotonically, but went from ${oldLog1} to ${log1} and ${oldLog2} to ${log2}"
+            )) :| s"local logs grow monotonically, but went from\n${oldLog1} to ${log1}\nand\n${oldLog2} to ${log2}"
       }
 
   case class Propose(proposer: LocalUid, value: A, slot: Long)
