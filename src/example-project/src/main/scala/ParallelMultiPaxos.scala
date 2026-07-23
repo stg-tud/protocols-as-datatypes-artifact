@@ -105,7 +105,7 @@ case class ParallelMultiPaxos[A](
     case xs  => Agreement.Decided(xs)
 
   override def toString: String =
-    lazy val s = s"MultiPaxos(commitIndex: $commitIndex, log: $log)"
+    lazy val s = s"PMultiPaxos(commitIndex: $commitIndex, log: $log)"
     s
 
 object ParallelMultiPaxos:
