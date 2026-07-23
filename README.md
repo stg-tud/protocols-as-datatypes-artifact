@@ -104,6 +104,8 @@ The notebook will fail to evaluate the later half of the cells because it is mis
 
 # Evaluation Instructions
 
+> _If you run into problems, see the Troubleshooting section at the end of the document._
+
 The main evaluation workflow when interacting with the artifact consists of two steps:
 
 1. mount a dataset into the docker container
