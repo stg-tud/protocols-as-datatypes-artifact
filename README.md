@@ -12,31 +12,13 @@ It contains the following components:
 
 # Download, Installation, and Sanity-Testing
 
-## **Hardware and Software Requirements:**
+## Hardware and Software Requirements:
 
 Our performance benchmarks are supposed to be run on cloud infrastructure.
 They require at least 4 Ubuntu machines (3 for the cluster, 1 for the benchmark runner) that you have SSH access to. For the artifact evaluation period of OOPSLA26, we give the reviewers access to remote servers that can be used to run our evaluation scripts.
 However, if you are reading this after artifact evaluation has ended, you will have to bring your own servers for the remote benchmarks (see the section "Additional Artifact Description" for details).
 
 For orchestrating the benchmarks and executing the other parts of the artifact, we provide two docker images, one for linux/amd64 and one for linux/arm64. The former should work on any 64 bit x86 system while the latter should work on 64 bit arm machines such as those based on Apple silicon chips.
-
-<!-- Within the docker image, you will find everything needed to:
-
-- compile and execute our code
-- run remote benchmarks via ansible
-- analyse the benchmark results and produce the figures from the paper
-
-The remote benchmarks require at least 4 Ubuntu machines (3 for the cluster, 1 for the benchmark runner) that you have SSH access to. For the artifact evaluation period of OOPSLA26, we give the reviewers access to the remote servers that we have used for our evaluation.
-
->
-
-However, if you are reading this after artifact evaluation has ended, you will have to bring your own servers for the remote benchmarks or stick with the local benchmarks.
-In order to run the benchmarks without docker (for improved performance), you will need to install java (JDK 21) and a recent version of the [fish shell](https://fishshell.com/) (we tested 4.2.1 and 4.8.1). All other dependencies are packaged with the artifact.
-
-_Disclaimer: While we aim to support local performance benchmarks, please note that it is generally a bad idea to have the benchmark runner and the benchmarked system on the same machine and that your results will differ from the ones reported in the paper.
-Additionally, local benchmark perfomance in Docker is very suboptimal, especially on non-linux hosts. For these cases, we do support running the benchmark scripts locally without docker._
-
---->
 
 ## Download and Installation
 
@@ -172,12 +154,11 @@ This will provision the needed cloud servers, run the benchmark for both systems
 
 **Interpreting the results:**
 
-Your results will differ from the ones that we reported in the paper.
+Your results will likely differ from the ones that we reported in the paper.
 In particular, there will always be a certain randomness factor when relying on cloud infrastructure. Any consensus-based key-value store is highly latency sensitive and we cannot control the exact location of the node machines. They will be located in the same data center but their exact location in the data center and the general network load of the data center will affect performance results.
 To ensure a fair comparison, our scripts always run the benchmark for both systems (etcd and ours) on the same servers befor tearing them down again.
 
-To make things worse, our cloud provider hetzner seems to be experiencing a high load on their cloud instances right now ([source](https://status.hetzner.com/incident/0a75c7ae-3377-41dc-aabe-601063724d24)).
-In our recent experiments, this lead to 2-3x higher latencies when compared to the performance at paper submission time.
+To make things worse, our cloud provider hetzner seems to be experiencing a high load on their cloud instances right now ([source](https://status.hetzner.com/incident/0a75c7ae-3377-41dc-aabe-601063724d24)), which can affect latencies.
 However, this affects both systems equally, and thus the general trends and observations that we describe in the paper still stand: With all nodes in the same data center, both systems perform comparably for writes, and our system outperforms etcd for reads.
 
 See the reproducibility guidelines for further discussion.
@@ -304,7 +285,7 @@ See the following figures for a comparison between the performance measurements 
 ![](img/through_lat_both_read.png)
 ![](img/through_lat_both_write.png)
 
-**Artifact Preparation Results** (changes are due to higher overall network latency, but still show the same trends):
+**Artifact Preparation Results** (changes are due to varying network latency, but still show the same trends):
 
 ![](img/through_lat_both_read_artifact.png)
 ![](img/through_lat_both_write_artifact.png)
