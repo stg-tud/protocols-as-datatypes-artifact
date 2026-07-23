@@ -17,7 +17,7 @@
         image: ubuntu-24.04
         location: fsn1
         state: present
-        # placement_group: falkenstein-spread
+        placement_group: falkenstein-spread
         ssh_keys:
           - "julian@aurum"
           - "ragnar@rmgk.de"
