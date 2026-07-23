@@ -153,9 +153,9 @@ RUNS=3 scripts/all-benchmarks.fish
 For a slightly quicker option, you can run individual benchmark scripts:
 
 ```bash
-scripts/datacententer-benchmarks.fish # ~10h
-scripts/geo-repl-benchmarks.fish # ~5h
-scripts/leader-failure-benchmark.fish # ~80min
+RUNS=3 scripts/datacententer-benchmarks.fish # ~10h
+RUNS=3 scripts/geo-repl-benchmarks.fish # ~5h
+RUNS=3 scripts/leader-failure-benchmark.fish # ~90min
 ```
 
 For the quickest option, you can run a single cloud benchmark using:
@@ -352,9 +352,9 @@ The scripts in this folder demonstrate how to run a local cluster of our key-val
 
 ## Troubleshooting
 
-**The ansible script is taking longer than expected/seems to hang/is throwing error messages.**
+**Q: The ansible script is taking longer than expected/seems to hang/is throwing error messages.**
 
-Some of the scripts can be a bit flaky/unpredictable. Try stopping the script via Ctrl-C.
+A: Some of the scripts can be a bit flaky/unpredictable. Try stopping the script via Ctrl-C.
 Then, reset the servers by running.
 
 ```bash
@@ -362,3 +362,10 @@ scripts/remove-all-servers.fish
 ```
 
 This removes all cloud servers such that the next script can start in a clean state.
+
+**Q: I don't want to wait 17h for the benchmark results.**
+
+A: You have several options:
+
+1. Try inspecting the pre-provided dataset in `datasets/paper_dataset` using the analysis scripts.
+2. Adjust the `RUNS` variable and only run individual scripts, e.g. `RUNS=1 scripts/geo-repl-benchmarks.fish`. This is more prone to outliers in the dataset because every configuration is only tested once, but it is more convenient for quick experimentation.
