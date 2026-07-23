@@ -44,9 +44,7 @@ RUN sbt --version
 
 # install python dependencies for jupyter
 RUN mkdir -p /app/analysis
-COPY analysis/Data_Visualization.ipynb /app/analysis/
-COPY analysis/Pipfile /app/analysis/
-COPY analysis/Pipfile.lock /app/analysis/
+COPY analysis /app/analysis
 WORKDIR /app/analysis
 RUN ["pipenv", "install"]
 
