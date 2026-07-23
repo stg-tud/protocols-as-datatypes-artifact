@@ -193,6 +193,8 @@ We also include the library as part of this artifact in the `src` folder. The ve
 
 See `src/Bismuth/Modules/RDTs/src/main/scala/rdts/protocols` for everything PRDT related. This includes a slightly extended version of the `Paxos` implementation from the paper, the `MultiPaxos` implementation that we use in our benchmarks, and other components such as `Voting` that we introduce in Section 2 of the paper.
 
+You can find the Paxos variants from Section 4.2 - 4.4 in the folder `rdts/protocols/paxosVariants`.
+
 Our key-value store implementation as well as the YCSB adapters used for our performance evaluation can be inspected in the `src/Bismuth/Modules/Protocol Benchmarks` module.
 
 ## Implementing Custom PRDTs (Reusability Scenario)
