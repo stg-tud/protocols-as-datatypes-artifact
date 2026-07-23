@@ -10,7 +10,7 @@ function run_bench
 	end
 end
 
-if not set -q $SERVERS
+if not set -q SERVERS
 	# run datacenter local benchmarks 3 nodes
 	# create servers
 	ansible-playbook -i ansible/hCloudInventory.hcloud.yaml -i ansible/inventory.yaml --extra-vars '{"bismuthdir": "/home/julian/Nextcloud/Uni/phd/Darmstadt/REScala", "nodenames": ["node1", "node2", "node3"]}' ansible/create-servers.yaml
