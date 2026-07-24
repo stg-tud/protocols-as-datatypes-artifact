@@ -9,9 +9,9 @@ set LEADER_TIMEOUT 50000
 
 # check system architecture and use respective etd binary
 if uname -m | grep -q 'x86_64'
-    set -x ETCD_BIN etcd/etcd-v3.6.7-linux-amd64/etcd
+    set -x ETCD_BIN bin/etcd/etcd-v3.6.7-linux-amd64/etcd
 else
-    set -x ETCD_BIN etcd/etcd-v3.6.7-linux-arm64/etcd
+    set -x ETCD_BIN bin/etcd/etcd-v3.6.7-linux-arm64/etcd
 end
 
 echo "Starting etcd cluster with $NUM_NODES nodes"
