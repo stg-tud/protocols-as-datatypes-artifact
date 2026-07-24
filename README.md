@@ -85,7 +85,9 @@ scripts/test-benchmark-cloud.fish
 This should run two simple benchmarks which takes around 7 minutes.
 There might be ansible deprecation warnings but the script should still run and in the end the results should show up in your `myresults` folder.
 After the benchmark has finished, you can start up the jupyter notebook again with the `scripts/run-jupyter.fish` command to inspect the results.
-The notebook will fail to evaluate the later half of the cells because it is missing input data for the leader failure and geo-replicated benchmark. This is expected and okay for now.
+Open the `Data_Center` notebook and re-run it via “Kernel > Restart Kernel and Run All Cells”.
+
+The notebook will fail to evaluate the later half of the cells because it is missing input data. This is expected and okay for now.
 
 # Evaluation Instructions
 

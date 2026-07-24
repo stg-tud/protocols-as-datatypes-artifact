@@ -3,7 +3,7 @@
 ansible-playbook -i ansible/hCloudInventory.hcloud.yaml -i ansible/inventory.yaml --extra-vars '{"nodenames": ["node1", "node2", "node3"]}' ansible/create-servers.yaml
 
 # run datacenter local benchmarks
-for workload in workloadb
+for workload in writeonly
     for system in pb etcd
         for threads in 50
             echo $workload $system $threads threads
