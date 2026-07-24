@@ -13,3 +13,5 @@ analysis/output
 analysis/*.pdf
 analysis/*.png
 .stainless-cache
+README_PDF.md
+README.pdf
