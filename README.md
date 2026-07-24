@@ -23,8 +23,6 @@ For orchestrating the benchmarks and executing the other parts of the artifact, 
 ## Download and Installation
 
 Download the artifact from [https://doi.org/10.5281/zenodo.21442650](https://doi.org/10.5281/zenodo.21442650)
-or from [https://zenodo.org/records/21442650?preview=1&token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjM3M2M4YWJkLWNkNjUtNDIwNy1iOWQzLTU2NTU5M2YyYTk3ZiIsImRhdGEiOnt9LCJyYW5kb20iOiIwNGU1MjY3ZDJkYTJlNTQzZjYzNGE4YTYzZmI4YzUxYSJ9.IqfDdxu_6Cbot2iwe5KJaKunSNSWHQe8QL9VIkOj5HxFYJxaNGV7HEru3lCLM5BQQjmOSRMczqOcmCWmv1JPAQ](https://zenodo.org/records/21442650?preview=1&token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjM3M2M4YWJkLWNkNjUtNDIwNy1iOWQzLTU2NTU5M2YyYTk3ZiIsImRhdGEiOnt9LCJyYW5kb20iOiIwNGU1MjY3ZDJkYTJlNTQzZjYzNGE4YTYzZmI4YzUxYSJ9.IqfDdxu_6Cbot2iwe5KJaKunSNSWHQe8QL9VIkOj5HxFYJxaNGV7HEru3lCLM5BQQjmOSRMczqOcmCWmv1JPAQ) during the artifact evaluation period.
-On 31st of August 2026, the artifact will automatically become available at the DOI.
 
 There you will find two docker images for easy execution and a zip file containing all the sources (code and scripts) used to build the docker images. The latter can be used to change and reuse the artifact, and to run it without docker.
 
