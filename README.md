@@ -60,7 +60,7 @@ scripts/run-jupyter.fish
 ```
 
 This should print a URL like `http://127.0.0.1:8888/tree?token=...` to your terminal. Copy this URL and paste it into a webbrowser.
-Inside the jupyter menu, select the "Data_Visualization.ipynb" notebook and run it via "Kernel > Restart Kernel and Run All Cells". This should produce several tables and plots.
+Inside the jupyter menu, select the "Data_Center.ipynb" notebook and run it via "Kernel > Restart Kernel and Run All Cells". This should produce several tables and plots.
 
 **Running Cloud Benchmarks:**
 
