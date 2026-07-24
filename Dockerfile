@@ -46,9 +46,6 @@ COPY prdt-artifact /root/.ssh/id_ed25519
 RUN chmod 600 /root/.ssh/id_ed25519
 COPY .ansible.cfg /root/.ansible.cfg
 
-
-COPY Justfile /app/Justfile
-
 RUN ["fish",  "-c", "set -Ux jarspath /app/jars"]
 
 WORKDIR /app
