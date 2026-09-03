@@ -171,7 +171,7 @@ See the reproducibility guidelines for further discussion.
 The main reusable component of our artifact is the PRDT library (written in Scala) that allows users to implement new protocols through composition (see Section 4 of the paper for a tour).
 We develop the library in the context of the Bismuth project and our PRDT components are included in its RDT library. Development happens on [Github](https://github.com/stg-tud/Bismuth) and we publish [Maven artifacts](https://index.scala-lang.org/stg-tud/bismuth/artifacts/rdts?pre-releases=false) that allow developers to easily include the library into their Scala projects. The code is licensed under Apache License 2.0 license.
 
-We also include the library as part of this artifact in the `src` folder. The version included in this artifact is also available under the https://github.com/stg-tud/Bismuth/tree/prdt-oopsla26-artifact branch.
+We also include the library as part of this artifact in the `src` folder. The version included in this artifact is also available under the following git tag: https://github.com/stg-tud/Bismuth/tree/2026-prdt-oopsla26-artifact.
 
 ## Navigating the Source Code
 
